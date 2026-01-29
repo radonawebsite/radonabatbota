@@ -2,104 +2,118 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>REDA MEGA PROJECT - 3D MODELS</title>
+    <title>REDA MEGA PROJECT - COMBAT AI</title>
     <style>
-        body { margin: 0; overflow: hidden; background: #111; font-family: sans-serif; }
-        #gui { position: absolute; top: 10px; left: 10px; color: white; background: rgba(0,0,0,0.7); padding: 15px; border-radius: 10px; border: 2px solid #00f2ff; }
-        .skin-btn { background: #00f2ff; border: none; padding: 5px 10px; cursor: pointer; margin-top: 5px; font-weight: bold; }
+        body { margin: 0; overflow: hidden; background: #000; font-family: sans-serif; }
+        #ui { position: absolute; top: 10px; left: 10px; color: #fff; background: rgba(0,0,0,0.8); padding: 15px; border-radius: 10px; border-left: 5px solid #ff0000; }
+        #health-bar { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); width: 200px; height: 10px; background: #333; border: 2px solid #fff; }
+        #health-fill { width: 100%; height: 100%; background: #00ff00; }
     </style>
 </head>
 <body>
-    <div id="gui">
-        <b>REDA AVATAR SYSTEM</b><br>
-        التحكم: WASD + Space<br>
-        تغيير السكين:<br>
-        <button class="skin-btn" onclick="changeSkin(0xff0000)">الأحمر القتالي</button><br>
-        <button class="skin-btn" onclick="changeSkin(0x00ff00)">الأخضر السام</button>
+    <div id="ui">
+        <b>REDA WORLD: WARRIOR</b><br>
+        الوحوش المقتولة: <span id="score">0</span><br>
+        الحالة: <span id="status">مستعد للقتال</span>
     </div>
+    <div id="health-bar"><div id="health-fill"></div></div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script>
-        let scene, camera, renderer, player, bodyParts = [];
+        let scene, camera, renderer, player, armR, sword, score = 0;
+        let enemies = [];
 
         window.onload = () => {
             scene = new THREE.Scene();
-            scene.background = new THREE.Color(0x131313);
+            scene.background = new THREE.Color(0x0a0a0a);
             camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
             renderer = new THREE.WebGLRenderer({ antialias: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
             document.body.appendChild(renderer.domElement);
 
             scene.add(new THREE.HemisphereLight(0xffffff, 0x444444, 1));
-            scene.add(new THREE.GridHelper(100, 20, 0x00f2ff, 0x222222));
 
-            // --- بناء الشخصية (Roblox Style Humanoid) ---
+            // الأرضية (Cyber Grid)
+            const grid = new THREE.GridHelper(200, 50, 0xff0000, 0x222222);
+            scene.add(grid);
+
+            // --- بناء اللاعب مع سيف لاصق ف اليد ---
             player = new THREE.Group();
+            const mat = new THREE.MeshPhongMaterial({color: 0x0066ff});
             
-            const mat = new THREE.MeshPhongMaterial({color: 0x00f2ff});
-            
-            // الرأس
-            const head = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.4, 0.4), mat);
-            head.position.y = 1.7;
-            player.add(head);
-
-            // الجذع (Torso)
             const torso = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.8, 0.3), mat);
             torso.position.y = 1.1;
             player.add(torso);
 
-            // اليدين
-            const armL = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.7, 0.2), mat);
-            armL.position.set(0.45, 1.1, 0);
-            player.add(armL);
+            const head = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.4, 0.4), new THREE.MeshPhongMaterial({color: 0xffdbac}));
+            head.position.y = 1.7;
+            player.add(head);
 
-            const armR = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.7, 0.2), mat);
-            armR.position.set(-0.45, 1.1, 0);
+            armR = new THREE.Group(); // اليد اليمنى لي هازة السيف
+            const armMesh = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.7, 0.2), mat);
+            armMesh.position.y = -0.35;
+            armR.add(armMesh);
+            armR.position.set(-0.45, 1.4, 0);
             player.add(armR);
 
-            // الرجلين
-            const legL = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.7, 0.25), mat);
-            legL.position.set(0.15, 0.35, 0);
-            player.add(legL);
+            // السيف (Weapon)
+            sword = new THREE.Mesh(new THREE.BoxGeometry(0.1, 1.2, 0.1), new THREE.MeshPhongMaterial({color: 0xffcc00}));
+            sword.position.y = -0.8;
+            sword.rotation.x = Math.PI / 2;
+            armR.add(sword);
 
-            const legR = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.7, 0.25), mat);
-            legR.position.set(-0.15, 0.35, 0);
-            player.add(legR);
-
-            bodyParts = [head, torso, armL, armR, legL, legR];
             scene.add(player);
 
-            // تحريك الأطراف عند المشي
-            let walkTime = 0;
+            // --- نظام الأعداء الأذكياء ---
+            function spawnEnemy() {
+                const enemy = new THREE.Mesh(new THREE.BoxGeometry(1, 2, 1), new THREE.MeshPhongMaterial({color: 0xff0000}));
+                enemy.position.set(Math.random()*100-50, 1, Math.random()*100-50);
+                scene.add(enemy);
+                enemies.push(enemy);
+            }
+            for(let i=0; i<5; i++) spawnEnemy();
+
+            // نظام التحكم والضرب
+            let isAttacking = false;
+            window.onclick = () => {
+                if(!isAttacking) {
+                    isAttacking = true;
+                    armR.rotation.x = -Math.PI / 2; // حركة الضرب
+                    
+                    // فحص التصادم مع العدو القريب
+                    enemies.forEach((enemy, index) => {
+                        if(player.position.distanceTo(enemy.position) < 4) {
+                            scene.remove(enemy);
+                            enemies.splice(index, 1);
+                            score++;
+                            document.getElementById('score').innerText = score;
+                            spawnEnemy();
+                        }
+                    });
+
+                    setTimeout(() => { armR.rotation.x = 0; isAttacking = false; }, 200);
+                }
+            };
+
             const keys = {};
             window.onkeydown = (e) => keys[e.code] = true;
             window.onkeyup = (e) => keys[e.code] = false;
 
-            window.changeSkin = (color) => {
-                bodyParts.forEach(p => p.material.color.setHex(color));
-            };
-
             function animate() {
                 requestAnimationFrame(animate);
-                
-                let isMoving = false;
-                if(keys['KeyW']) { player.translateZ(-0.1); isMoving = true; }
-                if(keys['KeyS']) { player.translateZ(0.1); isMoving = true; }
+                if(keys['KeyW']) player.translateZ(-0.2);
+                if(keys['KeyS']) player.translateZ(0.2);
                 if(keys['KeyA']) player.rotation.y += 0.05;
                 if(keys['KeyD']) player.rotation.y -= 0.05;
 
-                // تحريك اليدين والرجلين (Animation Logic)
-                if(isMoving) {
-                    walkTime += 0.2;
-                    armL.rotation.x = Math.sin(walkTime) * 0.5;
-                    armR.rotation.x = -Math.sin(walkTime) * 0.5;
-                    legL.rotation.x = -Math.sin(walkTime) * 0.5;
-                    legR.rotation.x = Math.sin(walkTime) * 0.5;
-                } else {
-                    bodyParts.forEach(p => p.rotation.x = 0);
-                }
+                // تحريك الأعداء باتجاه اللاعب (AI)
+                enemies.forEach(enemy => {
+                    const dir = new THREE.Vector3().subVectors(player.position, enemy.position).normalize();
+                    enemy.position.addScaledVector(dir, 0.05); // العدو كيتبعك
+                    enemy.lookAt(player.position);
+                });
 
-                camera.position.lerp(new THREE.Vector3(0, 5, 10).applyMatrix4(player.matrixWorld), 0.1);
+                camera.position.lerp(new THREE.Vector3(0, 6, 12).applyMatrix4(player.matrixWorld), 0.1);
                 camera.lookAt(player.position.x, player.position.y + 1, player.position.z);
                 renderer.render(scene, camera);
             }
