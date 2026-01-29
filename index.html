@@ -1,293 +1,94 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html>
 <head>
     <meta charset="UTF-8">
-    <title>Cosmic Odyssey: The Nebula Escape</title>
+    <title>COSMIC ESCAPE - REDA</title>
     <style>
-        body { margin: 0; overflow: hidden; background: #000; font-family: 'Orbitron', sans-serif; color: #00ffcc; text-shadow: 0 0 8px #00ffcc; display: flex; justify-content: center; align-items: center; height: 100vh; }
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap'); /* خط مستقبلي */
-
-        #loadingScreen, #startScreen, #storyScreen, #gameOverScreen {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.95);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            z-index: 100;
-        }
-
-        h1 { font-size: 3.5rem; text-transform: uppercase; letter-spacing: 5px; margin-bottom: 20px; color: #00ffff; }
-        p { font-size: 1.2rem; line-height: 1.6; max-width: 800px; margin: 20px auto; }
-
-        .btn {
-            background: linear-gradient(45deg, #00ffff, #00ffcc);
-            border: none;
-            padding: 15px 40px;
-            font-size: 1.5rem;
-            font-family: 'Orbitron', sans-serif;
-            color: #000;
-            cursor: pointer;
-            transition: all 0.3s ease-in-out;
-            box-shadow: 0 0 20px #00ffff;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-top: 30px;
-        }
-
-        .btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 40px #00ffff, 0 0 60px #00ffcc;
-        }
-
-        #gameCanvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            z-index: 1;
-            display: none; /* مخفية حتى تبدأ اللعبة */
-        }
-
-        #gameInfo {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            color: #00ffcc;
-            font-size: 20px;
-            text-shadow: 0 0 5px #00ffcc;
-            z-index: 50;
-            display: none; /* مخفية حتى تبدأ اللعبة */
-        }
-
-        /* مؤثرات تحميل بسيطة */
-        .spinner {
-            border: 8px solid rgba(0,0,0,.1);
-            border-left-color: #00ffcc;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            animation: spin 1s linear infinite;
-            margin-top: 30px;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
+        body { margin: 0; overflow: hidden; background: #000; font-family: sans-serif; }
+        #overlay { position: absolute; z-index: 10; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; background: rgba(0,0,0,0.8); color: #0ff; }
+        .btn { padding: 15px 30px; font-size: 20px; background: #0ff; border: none; cursor: pointer; color: #000; font-weight: bold; }
+        #ui { position: absolute; top: 10px; left: 10px; color: #0ff; font-size: 20px; z-index: 5; display: none; }
     </style>
 </head>
 <body>
-    <div id="loadingScreen">
-        <h1>LOADING COSMIC ASSETS...</h1>
-        <div class="spinner"></div>
-    </div>
-
-    <div id="startScreen" style="display:none;">
-        <h1>COSMIC ODYSSEY</h1>
-        <p>الهروب من السديم</p>
-        <button class="btn" onclick="showStory()">بدء الرحلة</button>
-    </div>
-
-    <div id="storyScreen" style="display:none;">
-        <h1>القصة</h1>
-        <p>
-            في عام 2077، بعد أن دمرت الحروب الكوكبية الأرض، أصبحت أنت الناجي الوحيد على متن سفينتك "Phoenix".
-            عليك الهروب من سديم "الأبدية" الذي يبتلع كل شيء في طريقه.
-            كل ثانية تبقى فيها حياً هي انتصار.
-            الجاذبية الكونية تجذبك، والعقبات تزداد تعقيداً.
-            حرك سفينتك، واستخدم ذكائك لتنجو من هذا الجحيم البارد.
-        </p>
+    <div id="ui">SCORE: <span id="score">0</span></div>
+    <div id="overlay">
+        <h1>COSMIC ESCAPE</h1>
+        <p>استخدم الأسهم للتحرك وتفادي الكويكبات</p>
         <button class="btn" onclick="startGame()">بدء الهروب</button>
-    </div>
-
-    <div id="gameOverScreen" style="display:none;">
-        <h1>GAME OVER</h1>
-        <p id="finalScore">لقد نجوت لمدة: 0 ثانية</p>
-        <button class="btn" onclick="location.reload()">إعادة اللعب</button>
-    </div>
-
-    <div id="gameInfo" style="display:none;">
-        TIME: <span id="gameTime">0</span>s
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script>
-        // متغيرات اللعبة الأساسية
-        let scene, camera, renderer, player, obstacles = [], particles, gameRunning = false, startTime, elapsedTime = 0;
-        let speed = 0.5; // سرعة اللاعب الأولية
-        const OBSTACLE_COUNT = 30; // عدد العوائق في السديم
-        const ASTEROID_SIZE = 1;
+        let scene, camera, renderer, player, obstacles = [], gameRunning = false, score = 0;
 
-        // وظيفة تهيئة اللعبة
-        function initGame() {
-            // إخفاء كل الشاشات
-            document.getElementById('loadingScreen').style.display = 'none';
-            document.getElementById('startScreen').style.display = 'none';
-            document.getElementById('storyScreen').style.display = 'none';
-            document.getElementById('gameOverScreen').style.display = 'none';
-            document.getElementById('gameInfo').style.display = 'block';
-
-            // إعداد المشهد (Scene)
+        function init() {
             scene = new THREE.Scene();
-            scene.background = new THREE.Color(0x000000); // خلفية سوداء للسديم
-            scene.fog = new THREE.Fog(0x000000, 10, 100); // ضباب لإعطاء عمق
-
-            // إعداد الكاميرا
             camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-            camera.position.set(0, 2, 10); // موقع الكاميرا خلف اللاعب
-
-            // إعداد Renderer
             renderer = new THREE.WebGLRenderer({ antialias: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
             document.body.appendChild(renderer.domElement);
-            renderer.domElement.id = 'gameCanvas';
 
-            // الإضاءة (إضاءة كونية زرقاء/أرجوانية)
-            const ambientLight = new THREE.AmbientLight(0x404040); // إضاءة عامة
-            scene.add(ambientLight);
-            const pointLight = new THREE.PointLight(0x00ffff, 1, 100); // ضوء نقطي أزرق
-            pointLight.position.set(0, 10, 0);
-            scene.add(pointLight);
+            camera.position.z = 5;
 
-            // اللاعب (سفينة فضائية بسيطة)
-            const playerGeo = new THREE.ConeGeometry(0.8, 2, 32);
-            const playerMat = new THREE.MeshPhongMaterial({ color: 0x00ffcc, emissive: 0x00ffcc, emissiveIntensity: 0.8 });
-            player = new THREE.Mesh(playerGeo, playerMat);
-            player.rotation.x = Math.PI / 2; // لتكون السفينة موجهة للأمام
-            player.position.set(0, 0, 0);
+            // إضاءة
+            const light = new THREE.PointLight(0xffffff, 1, 100);
+            light.position.set(0, 5, 5);
+            scene.add(light);
+            scene.add(new THREE.AmbientLight(0x333333));
+
+            // اللاعب (مكعب أخضر)
+            player = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.5, 0.5), new THREE.MeshPhongMaterial({ color: 0x00ff00 }));
             scene.add(player);
 
-            // جزيئات السديم الخلفية (خارج اللعبة)
-            particles = new THREE.Group();
-            const particleGeo = new THREE.SphereGeometry(0.1, 8, 8);
-            const particleMat = new THREE.MeshBasicMaterial({ color: 0x00ffff });
-            for (let i = 0; i < 500; i++) {
-                const particle = new THREE.Mesh(particleGeo, particleMat);
-                particle.position.set(
-                    Math.random() * 200 - 100,
-                    Math.random() * 200 - 100,
-                    Math.random() * 200 - 100
-                );
-                particles.add(particle);
+            // إنشاء عوائق
+            for(let i=0; i<20; i++) {
+                let obs = new THREE.Mesh(new THREE.SphereGeometry(0.3, 12, 12), new THREE.MeshPhongMaterial({ color: 0xff0000 }));
+                resetObstacle(obs);
+                scene.add(obs);
+                obstacles.push(obs);
             }
-            scene.add(particles);
-
-            // إنشاء العوائق الأولية (كويكبات)
-            for (let i = 0; i < OBSTACLE_COUNT; i++) {
-                createObstacle();
-            }
-
-            // التحكم باللاعب
-            window.addEventListener('keydown', handleKeyDown);
-            window.addEventListener('resize', handleResize);
         }
 
-        // وظيفة إنشاء العوائق (كويكبات)
-        function createObstacle() {
-            const obsGeo = new THREE.SphereGeometry(ASTEROID_SIZE + Math.random() * 1, 16, 16);
-            const obsMat = new THREE.MeshPhongMaterial({ color: 0x8800ff, emissive: 0x440088, emissiveIntensity: 0.5 });
-            const obs = new THREE.Mesh(obsGeo, obsMat);
-
-            obs.position.set(
-                (Math.random() - 0.5) * 20, // X: بين -10 و 10
-                (Math.random() - 0.5) * 10, // Y: بين -5 و 5
-                -Math.random() * 100 - 20 // Z: تظهر بعيداً عن الكاميرا
-            );
-            obstacles.push(obs);
-            scene.add(obs);
-        }
-
-        // حركة اللاعب
-        function handleKeyDown(event) {
-            if (!gameRunning) return;
-
-            const moveSpeed = 0.5;
-            if (event.key === 'ArrowLeft') player.position.x -= moveSpeed;
-            if (event.key === 'ArrowRight') player.position.x += moveSpeed;
-            if (event.key === 'ArrowUp') player.position.y += moveSpeed;
-            if (event.key === 'ArrowDown') player.position.y -= moveSpeed;
-
-            // حصر اللاعب ضمن حدود الشاشة
-            player.position.x = Math.max(-8, Math.min(8, player.position.x));
-            player.position.y = Math.max(-4, Math.min(4, player.position.y));
-        }
-
-        // حلقة اللعبة الرئيسية
-        function animate() {
-            requestAnimationFrame(animate);
-
-            if (gameRunning) {
-                // تحديث سرعة اللعبة
-                speed += 0.0001; // تزداد الصعوبة تدريجياً
-                elapsedTime = Math.floor((performance.now() - startTime) / 1000);
-                document.getElementById('gameTime').innerText = elapsedTime;
-
-                // تحريك العوائق نحو الكاميرا
-                obstacles.forEach((obs, index) => {
-                    obs.position.z += speed;
-                    if (obs.position.z > camera.position.z) {
-                        // إعادة تدوير العائق عندما يمر بالكاميرا
-                        obs.position.z = -Math.random() * 100 - 20;
-                        obs.position.x = (Math.random() - 0.5) * 20;
-                        obs.position.y = (Math.random() - 0.5) * 10;
-                    }
-
-                    // اكتشاف التصادم (كرة بسيطة)
-                    const distance = player.position.distanceTo(obs.position);
-                    if (distance < (player.geometry.parameters.radius || 0.8) + (obs.geometry.parameters.radius || ASTEROID_SIZE)) {
-                        gameOver();
-                    }
-                });
-
-                // تحريك جزيئات السديم
-                particles.children.forEach(p => {
-                    p.position.z += speed * 0.5;
-                    if (p.position.z > camera.position.z) {
-                        p.position.z = -100; // إعادة تموضع الجزيئات
-                    }
-                });
-            }
-
-            renderer.render(scene, camera);
-        }
-
-        // عند تغيير حجم النافذة
-        function handleResize() {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        }
-
-        // وظائف الشاشات
-        function showStory() {
-            document.getElementById('startScreen').style.display = 'none';
-            document.getElementById('storyScreen').style.display = 'flex';
+        function resetObstacle(obs) {
+            obs.position.set(Math.random()*10-5, Math.random()*10-5, -Math.random()*20 - 10);
         }
 
         function startGame() {
-            document.getElementById('storyScreen').style.display = 'none';
-            document.getElementById('gameCanvas').style.display = 'block';
-            document.getElementById('gameInfo').style.display = 'block';
-            initGame(); // تهيئة اللعبة بعد إخفاء شاشة القصة
+            document.getElementById('overlay').style.display = 'none';
+            document.getElementById('ui').style.display = 'block';
+            if(!scene) init();
             gameRunning = true;
-            startTime = performance.now();
             animate();
         }
 
-        function gameOver() {
-            gameRunning = false;
-            document.getElementById('gameCanvas').style.display = 'none';
-            document.getElementById('gameInfo').style.display = 'none';
-            document.getElementById('finalScore').innerText = `لقد نجوت لمدة: ${elapsedTime} ثانية`;
-            document.getElementById('gameOverScreen').style.display = 'flex';
+        function animate() {
+            if(!gameRunning) return;
+            requestAnimationFrame(animate);
+
+            obstacles.forEach(obs => {
+                obs.position.z += 0.1;
+                if(obs.position.z > 5) resetObstacle(obs);
+
+                // تصادم بسيط
+                if(player.position.distanceTo(obs.position) < 0.6) {
+                    alert("انتهت اللعبة! رصيدك: " + Math.floor(score));
+                    location.reload();
+                    gameRunning = false;
+                }
+            });
+
+            score += 0.1;
+            document.getElementById('score').innerText = Math.floor(score);
+            renderer.render(scene, camera);
         }
 
-        // عند تحميل الصفحة
-        window.onload = () => {
-            setTimeout(() => { // محاكاة تحميل الأصول
-                document.getElementById('loadingScreen').style.display = 'none';
-                document.getElementById('startScreen').style.display = 'flex';
-            }, 3000); // تظهر شاشة البداية بعد 3 ثواني
-        };
+        window.addEventListener('keydown', (e) => {
+            if(e.key === "ArrowLeft") player.position.x -= 0.2;
+            if(e.key === "ArrowRight") player.position.x += 0.2;
+            if(e.key === "ArrowUp") player.position.y += 0.2;
+            if(e.key === "ArrowDown") player.position.y -= 0.2;
+        });
     </script>
 </body>
 </html>
