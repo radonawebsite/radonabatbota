@@ -1,50 +1,104 @@
 <!DOCTYPE html>
-<html>
+<html lang="ar">
 <head>
-    <title>Reda Arcade | الاحترافية</title>
+    <meta charset="UTF-8">
+    <title>REDA - Black Hole Survivor</title>
     <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
     <style>
         body { margin: 0; background: #000; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
-        canvas { border: 4px solid #00ff41; box-shadow: 0 0 20px #00ff41; }
+        canvas { border: 2px solid #00ff41; box-shadow: 0 0 30px #00ff41; }
     </style>
 </head>
 <body>
-    <script>
-        // إعدادات اللعبة الاحترافية
-        const config = {
-            type: Phaser.AUTO,
-            width: 800,
-            height: 600,
-            physics: { default: 'arcade', arcade: { gravity: { y: 300 }, debug: false } },
-            scene: { preload: preload, create: create, update: update }
-        };
+<script>
+const config = {
+    type: Phaser.AUTO,
+    width: 800,
+    height: 600,
+    physics: { default: 'arcade', arcade: { debug: false } },
+    scene: { preload, create, update }
+};
 
-        const game = new Phaser.Game(config);
+const game = new Phaser.Game(config);
+let player, stars, enemies, particles, scoreText, timer, score = 0, isGameOver = false;
 
-        function preload() {
-            // هنا تحمل الصور والأصوات (Assets)
-            this.load.image('sky', 'https://labs.phaser.io/assets/skies/space3.png');
-            this.load.image('logo', 'https://labs.phaser.io/assets/sprites/phaser3-logo.png');
-            this.load.image('red', 'https://labs.phaser.io/assets/particles/red.png');
-        }
+function preload() {
+    this.load.image('star', 'https://labs.phaser.io/assets/sprites/tiny_star.png');
+    this.load.image('player', 'https://labs.phaser.io/assets/sprites/spaceship.png');
+    this.load.image('enemy', 'https://labs.phaser.io/assets/sprites/asmosoma.png');
+    this.load.image('flare', 'https://labs.phaser.io/assets/particles/green_lines.png');
+}
 
-        function create() {
-            this.add.image(400, 300, 'sky');
-            const particles = this.add.particles('red');
-            const emitter = particles.createEmitter({
-                speed: 100, scale: { start: 1, end: 0 }, blendMode: 'ADD'
-            });
-            const logo = this.physics.add.image(400, 100, 'logo');
-            logo.setVelocity(100, 200);
-            logo.setBounce(1, 1);
-            logo.setCollideWorldBounds(true);
-            emitter.startFollow(logo);
-        }
+function create() {
+    // 1. نظام الخلفية المتحركة
+    stars = this.add.group({ key: 'star', repeat: 100, setXY: { x: 0, y: 0, stepX: 10 } });
+    stars.children.iterate(child => {
+        child.x = Phaser.Math.Between(0, 800);
+        child.y = Phaser.Math.Between(0, 600);
+        child.setAlpha(Phaser.Math.FloatBetween(0.2, 0.8));
+    });
 
-        function update() {
-            // هنا تضع منطق اللعبة (حركة اللاعب، التصادم، إلخ)
-        }
-    </script>
+    // 2. إنشاء اللاعب مع تأثير الجزيئات
+    particles = this.add.particles('flare');
+    const emitter = particles.createEmitter({
+        speed: 50, scale: { start: 0.5, end: 0 }, blendMode: 'ADD'
+    });
+
+    player = this.physics.add.sprite(400, 300, 'player');
+    player.setDrag(100).setAngularDrag(100).setMaxVelocity(300).setCollideWorldBounds(true);
+    emitter.startFollow(player);
+
+    // 3. نظام الأعداء (ثقوب سوداء صغيرة)
+    enemies = this.physics.add.group();
+    timer = this.time.addEvent({
+        delay: 800,
+        callback: spawnEnemy,
+        callbackScope: this,
+        loop: true
+    });
+
+    // 4. النصوص والنتائج
+    scoreText = this.add.text(20, 20, 'Time Survived: 0s', { fontSize: '24px', fill: '#0f0', fontFamily: 'Courier New' });
+
+    // 5. نظام التصادم
+    this.physics.add.collider(player, enemies, gameOver, null, this);
+    this.cursors = this.input.keyboard.createCursorKeys();
+}
+
+function spawnEnemy() {
+    if (isGameOver) return;
+    let x = (Math.random() < 0.5) ? 0 : 800;
+    let y = Phaser.Math.Between(0, 600);
+    let enemy = enemies.create(x, y, 'enemy');
+    enemy.setTint(0xff0000).setBounce(1).setCollideWorldBounds(false);
+    this.physics.moveToObject(enemy, player, 150 + (score * 2)); // تزداد السرعة مع الوقت
+}
+
+function update(time, delta) {
+    if (isGameOver) return;
+
+    // حركة اللاعب الاحترافية (Rotational Movement)
+    if (this.cursors.left.isDown) player.setAngularVelocity(-150);
+    else if (this.cursors.right.isDown) player.setAngularVelocity(150);
+    else player.setAngularVelocity(0);
+
+    if (this.cursors.up.isDown) this.physics.velocityFromRotation(player.rotation, 250, player.body.acceleration);
+    else player.setAcceleration(0);
+
+    // تحديث الوقت
+    score = Math.floor(time / 1000);
+    scoreText.setText('Time Survived: ' + score + 's');
+}
+
+function gameOver() {
+    isGameOver = true;
+    this.physics.pause();
+    player.setTint(0xff0000);
+    this.add.text(200, 250, 'GAME OVER\nSYSTEM BREACHED', { 
+        fontSize: '64px', fill: '#f00', align: 'center', fontFamily: 'Courier New', fontWeight: 'bold' 
+    });
+    this.add.text(250, 400, 'Click to Restart', { fontSize: '24px', fill: '#fff' })
+        .setInteractive().on('pointerdown', () => location.reload());
+}
+</script>
 </body>
-</html>
- 
