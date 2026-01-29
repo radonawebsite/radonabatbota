@@ -1,82 +1,72 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar">
 <head>
     <meta charset="UTF-8">
-    <title>REDA | Beyond Reality</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <title>THE ARCHIVE | أثر لا يزول</title>
     <style>
-        body { margin: 0; background: #000; color: white; font-family: 'Cairo', sans-serif; overflow: hidden; cursor: crosshair; }
-        #canvas-container { position: fixed; top: 0; left: 0; z-index: 1; }
-        .ui-layer { position: relative; z-index: 10; pointer-events: none; height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; }
-        .interactive-element { pointer-events: auto; }
-        .pink-glow { color: #ffb7c5; text-shadow: 0 0 30px #ffb7c5; font-weight: 900; }
-        .floating-nav { position: fixed; top: 30px; display: flex; gap: 40px; font-size: 0.7rem; letter-spacing: 5px; text-transform: uppercase; }
-        #instruction { position: fixed; bottom: 30px; opacity: 0.5; font-size: 0.8rem; }
+        body { margin: 0; background: #000; overflow: hidden; color: #ffb7c5; font-family: 'Courier New', monospace; cursor: crosshair; }
+        #canvas-container { position: fixed; top: 0; left: 0; }
+        #info { position: fixed; top: 20px; width: 100%; text-align: center; letter-spacing: 5px; font-size: 10px; opacity: 0.4; }
+        #date-display { position: fixed; bottom: 20px; right: 20px; font-size: 12px; }
     </style>
 </head>
 <body>
+    <div id="info">كل حركة تترك أثراً في الذاكرة الرقمية</div>
+    <div id="date-display">2026 - THE BEGINNING</div>
     <div id="canvas-container"></div>
-    
-    <div class="floating-nav ui-layer">
-        <a href="#" class="interactive-element hover:text-[#ffb7c5]">Dreams</a>
-        <img src="logo.png" class="h-12 interactive-element mx-10">
-        <a href="#" class="interactive-element hover:text-[#ffb7c5]">Legacy</a>
-    </div>
 
-    <div class="ui-layer">
-        <h1 class="text-7xl md:text-9xl pink-glow interactive-element tracking-tighter" id="title">MEMORABLE</h1>
-        <p class="mt-5 text-gray-500 tracking-[1.5em] text-[10px] md:text-xs">WE DESIGN EMOTIONS, NOT EVENTS</p>
-        <button class="interactive-element mt-20 border border-[#ffb7c5] px-12 py-4 rounded-full text-[#ffb7c5] hover:bg-[#ffb7c5] hover:text-black transition-all duration-700">دخول إلى التجربة</button>
-    </div>
-
-    <div id="instruction" class="w-full text-center">حرك الماوس لتشكيل مجرتك الخاصة</div>
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
     <script>
-        let scene, camera, renderer, starGeo, stars;
-        let mouseX = 0, mouseY = 0;
+        let history = []; // هاد المصفوفة غانخليوها ترسم أثر تاريخي
+        let maxHistory = 500;
 
-        init();
-        animate();
-
-        function init() {
-            scene = new THREE.Scene();
-            camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 1000);
-            camera.position.z = 1;
-            camera.rotation.x = Math.PI/2;
-
-            starGeo = new THREE.BufferGeometry();
-            let positions = [];
-            for(let i=0; i<6000; i++) {
-                let star = new THREE.Vector3(Math.random()*600-300, Math.random()*600-300, Math.random()*600-300);
-                positions.push(star.x, star.y, star.z);
-            }
-            starGeo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
-
-            let sprite = new THREE.PointsMaterial({ color: 0xffb7c5, size: 0.7, transparent: true });
-            stars = new THREE.Points(starGeo, sprite);
-            scene.add(stars);
-
-            renderer = new THREE.WebGLRenderer();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            document.getElementById('canvas-container').appendChild(renderer.domElement);
-
-            document.addEventListener('mousemove', (e) => {
-                mouseX = e.clientX;
-                mouseY = e.clientY;
-            });
+        function setup() {
+            createCanvas(windowWidth, windowHeight);
+            background(0);
         }
 
-        function animate() {
-            // تحريك النجوم بناءً على الماوس
-            stars.rotation.y += 0.002;
-            let targetX = (mouseX - window.innerWidth/2) * 0.001;
-            let targetY = (mouseY - window.innerHeight/2) * 0.001;
-            stars.rotation.z += targetX * 0.1;
-            stars.rotation.x += targetY * 0.1;
+        function draw() {
+            background(0, 15); // الحفاظ على أثر الحركة
+            
+            // رسم "الخيط الزمني" المركزي
+            stroke(255, 183, 197, 30);
+            line(0, height/2, width, height/2);
 
-            renderer.render(scene, camera);
-            requestAnimationFrame(animate);
+            // إضافة "ذكرى" جديدة عند حركة الماوس
+            if (mouseX !== 0 && mouseY !== 0) {
+                history.push({x: mouseX, y: mouseY, size: random(2, 8), opacity: 255});
+            }
+
+            if (history.length > maxHistory) history.shift();
+
+            for (let i = 0; i < history.length; i++) {
+                let h = history[i];
+                noStroke();
+                fill(255, 183, 197, h.opacity);
+                ellipse(h.x, h.y, h.size);
+                
+                // ربط الذكرى بخيط الزمن
+                stroke(255, 183, 197, 10);
+                line(h.x, h.y, h.x, height/2);
+                
+                h.opacity -= 0.5; // تلاشي بطيء جداً كأنه ذكرى قديمة
+            }
+        }
+
+        function windowResized() {
+            resizeCanvas(windowWidth, windowHeight);
+        }
+
+        function mousePressed() {
+            // تأثير "الانفجار التاريخي" عند الضغط
+            for(let i=0; i<20; i++) {
+                history.push({
+                    x: mouseX + random(-50, 50),
+                    y: mouseY + random(-50, 50),
+                    size: random(10, 20),
+                    opacity: 255
+                });
+            }
         }
     </script>
 </body>
