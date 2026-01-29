@@ -1,104 +1,95 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>REDA - Black Hole Survivor</title>
-    <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
+    <title>REDA 3D DISCO RUN</title>
     <style>
-        body { margin: 0; background: #000; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
-        canvas { border: 2px solid #00ff41; box-shadow: 0 0 30px #00ff41; }
+        body { margin: 0; overflow: hidden; background: #000; font-family: 'Courier New', monospace; }
+        #info { position: absolute; top: 10px; width: 100%; text-align: center; color: #0f0; font-size: 24px; pointer-events: none; }
     </style>
 </head>
 <body>
-<script>
-const config = {
-    type: Phaser.AUTO,
-    width: 800,
-    height: 600,
-    physics: { default: 'arcade', arcade: { debug: false } },
-    scene: { preload, create, update }
-};
+    <div id="info">SCORE: 0 <br> [Arrows to Move]</div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        let scene, camera, renderer, player, obstacles = [], score = 0;
+        let speed = 0.2;
 
-const game = new Phaser.Game(config);
-let player, stars, enemies, particles, scoreText, timer, score = 0, isGameOver = false;
+        function init() {
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x050505);
+            scene.fog = new THREE.Fog(0x050505, 1, 50);
 
-function preload() {
-    this.load.image('star', 'https://labs.phaser.io/assets/sprites/tiny_star.png');
-    this.load.image('player', 'https://labs.phaser.io/assets/sprites/spaceship.png');
-    this.load.image('enemy', 'https://labs.phaser.io/assets/sprites/asmosoma.png');
-    this.load.image('flare', 'https://labs.phaser.io/assets/particles/green_lines.png');
-}
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(0, 2, 5);
 
-function create() {
-    // 1. نظام الخلفية المتحركة
-    stars = this.add.group({ key: 'star', repeat: 100, setXY: { x: 0, y: 0, stepX: 10 } });
-    stars.children.iterate(child => {
-        child.x = Phaser.Math.Between(0, 800);
-        child.y = Phaser.Math.Between(0, 600);
-        child.setAlpha(Phaser.Math.FloatBetween(0.2, 0.8));
-    });
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.body.appendChild(renderer.domElement);
 
-    // 2. إنشاء اللاعب مع تأثير الجزيئات
-    particles = this.add.particles('flare');
-    const emitter = particles.createEmitter({
-        speed: 50, scale: { start: 0.5, end: 0 }, blendMode: 'ADD'
-    });
+            // الإضاءة
+            const light = new THREE.DirectionalLight(0xffffff, 1);
+            light.position.set(0, 10, 10);
+            scene.add(light);
+            scene.add(new THREE.AmbientLight(0x404040));
 
-    player = this.physics.add.sprite(400, 300, 'player');
-    player.setDrag(100).setAngularDrag(100).setMaxVelocity(300).setCollideWorldBounds(true);
-    emitter.startFollow(player);
+            // اللاعب (كرة مضيئة)
+            const geometry = new THREE.SphereGeometry(0.5, 32, 32);
+            const material = new THREE.MeshPhongMaterial({ color: 0x00ff41, emissive: 0x00ff41, emissiveIntensity: 0.5 });
+            player = new THREE.Mesh(geometry, material);
+            player.position.y = 0.5;
+            scene.add(player);
 
-    // 3. نظام الأعداء (ثقوب سوداء صغيرة)
-    enemies = this.physics.add.group();
-    timer = this.time.addEvent({
-        delay: 800,
-        callback: spawnEnemy,
-        callbackScope: this,
-        loop: true
-    });
+            // الأرضية (الطريق)
+            const floorGeo = new THREE.PlaneGeometry(10, 200);
+            const floorMat = new THREE.MeshPhongMaterial({ color: 0x111111 });
+            const floor = new THREE.Mesh(floorGeo, floorMat);
+            floor.rotation.x = -Math.PI / 2;
+            scene.add(floor);
 
-    // 4. النصوص والنتائج
-    scoreText = this.add.text(20, 20, 'Time Survived: 0s', { fontSize: '24px', fill: '#0f0', fontFamily: 'Courier New' });
+            createObstacle();
+            animate();
+        }
 
-    // 5. نظام التصادم
-    this.physics.add.collider(player, enemies, gameOver, null, this);
-    this.cursors = this.input.keyboard.createCursorKeys();
-}
+        function createObstacle() {
+            const obsGeo = new THREE.BoxGeometry(1, 1, 1);
+            const obsMat = new THREE.MeshPhongMaterial({ color: 0xff0000 });
+            const obs = new THREE.Mesh(obsGeo, obsMat);
+            obs.position.set(Math.floor(Math.random() * 3) - 1, 0.5, -50);
+            scene.add(obs);
+            obstacles.push(obs);
+            setTimeout(createObstacle, 1000 / (1 + score/100));
+        }
 
-function spawnEnemy() {
-    if (isGameOver) return;
-    let x = (Math.random() < 0.5) ? 0 : 800;
-    let y = Phaser.Math.Between(0, 600);
-    let enemy = enemies.create(x, y, 'enemy');
-    enemy.setTint(0xff0000).setBounce(1).setCollideWorldBounds(false);
-    this.physics.moveToObject(enemy, player, 150 + (score * 2)); // تزداد السرعة مع الوقت
-}
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft' && player.position.x > -1) player.position.x -= 1;
+            if (e.key === 'ArrowRight' && player.position.x < 1) player.position.x += 1;
+        });
 
-function update(time, delta) {
-    if (isGameOver) return;
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            // تحريك العوائق
+            obstacles.forEach((obs, index) => {
+                obs.position.z += speed;
+                // تصادم
+                if (obs.position.z > 4.5 && obs.position.z < 5.5 && Math.round(obs.position.x) === Math.round(player.position.x)) {
+                    alert("GAME OVER! SCORE: " + Math.floor(score));
+                    location.reload();
+                }
+                if (obs.position.z > 10) {
+                    scene.remove(obs);
+                    obstacles.splice(index, 1);
+                }
+            });
 
-    // حركة اللاعب الاحترافية (Rotational Movement)
-    if (this.cursors.left.isDown) player.setAngularVelocity(-150);
-    else if (this.cursors.right.isDown) player.setAngularVelocity(150);
-    else player.setAngularVelocity(0);
+            score += 0.1;
+            document.getElementById('info').innerHTML = "SCORE: " + Math.floor(score);
+            speed += 0.0001; // زيادة الصعوبة
 
-    if (this.cursors.up.isDown) this.physics.velocityFromRotation(player.rotation, 250, player.body.acceleration);
-    else player.setAcceleration(0);
+            renderer.render(scene, camera);
+        }
 
-    // تحديث الوقت
-    score = Math.floor(time / 1000);
-    scoreText.setText('Time Survived: ' + score + 's');
-}
-
-function gameOver() {
-    isGameOver = true;
-    this.physics.pause();
-    player.setTint(0xff0000);
-    this.add.text(200, 250, 'GAME OVER\nSYSTEM BREACHED', { 
-        fontSize: '64px', fill: '#f00', align: 'center', fontFamily: 'Courier New', fontWeight: 'bold' 
-    });
-    this.add.text(250, 400, 'Click to Restart', { fontSize: '24px', fill: '#fff' })
-        .setInteractive().on('pointerdown', () => location.reload());
-}
-</script>
+        init();
+    </script>
 </body>
+</html>
