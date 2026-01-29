@@ -2,18 +2,26 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>REDA PROJECT - STEP 3 FIXED</title>
+    <title>REDA WORLD - Phase 4</title>
     <style>
         body { margin: 0; overflow: hidden; background: #87CEEB; font-family: sans-serif; }
         #ui { position: absolute; top: 10px; left: 10px; color: white; background: rgba(0,0,0,0.6); padding: 15px; border-radius: 8px; z-index: 10; }
+        /* صندوق الحوار */
+        #dialog-box { 
+            position: absolute; bottom: 50px; left: 50%; transform: translateX(-50%);
+            width: 70%; background: rgba(0,0,0,0.85); color: #00ffcc; padding: 20px;
+            border: 2px solid #00ffcc; border-radius: 15px; display: none; text-align: center;
+            font-size: 20px; z-index: 20;
+        }
     </style>
 </head>
 <body>
     <div id="ui">
-        <b>REDA WORLD - Phase 3 (Fixed)</b><br>
-        التحكم: WASD + Space للقفز<br>
-        <span id="pos">جاري التحميل...</span>
+        <b>REDA WORLD - Phase 4</b><br>
+        المهمة: ابحث عن "الحارس البرتقالي" وسط الأشجار
     </div>
+
+    <div id="dialog-box" id="msg">أهلاً بك يا رضا! هذا العالم مليء بالأسرار.. هل أنت مستعد للمغامرة؟</div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script>
@@ -27,77 +35,65 @@
             renderer.setSize(window.innerWidth, window.innerHeight);
             document.body.appendChild(renderer.domElement);
 
-            // إضاءة بسيطة ومضمونة
             const light = new THREE.HemisphereLight(0xffffff, 0x444444, 1);
             scene.add(light);
-            const dirLight = new THREE.DirectionalLight(0xffffff, 0.5);
-            dirLight.position.set(5, 10, 5);
-            scene.add(dirLight);
 
             // الأرضية
-            const ground = new THREE.Mesh(
-                new THREE.PlaneGeometry(200, 200), 
-                new THREE.MeshPhongMaterial({color: 0x348C31})
-            );
+            const ground = new THREE.Mesh(new THREE.PlaneGeometry(200, 200), new THREE.MeshPhongMaterial({color: 0x348C31}));
             ground.rotation.x = -Math.PI / 2;
             scene.add(ground);
 
-            // إضافة غابة (مخاريط بسيطة)
-            for(let i=0; i<50; i++) {
-                const tree = new THREE.Mesh(
-                    new THREE.ConeGeometry(0.8, 3, 8), 
-                    new THREE.MeshPhongMaterial({color: 0x1a4a16})
-                );
-                tree.position.set(Math.random()*100-50, 1.5, Math.random()*100-50);
+            // إضافة الأشجار
+            for(let i=0; i<40; i++) {
+                const tree = new THREE.Mesh(new THREE.ConeGeometry(0.5, 2, 8), new THREE.MeshPhongMaterial({color: 0x133d0e}));
+                tree.position.set(Math.random()*80-40, 1, Math.random()*80-40);
                 scene.add(tree);
             }
 
-            // اللاعب (مكعب طويل لضمان التوافق)
+            // شخصية NPC (الحارس)
+            const npc = new THREE.Mesh(new THREE.BoxGeometry(1, 2, 1), new THREE.MeshPhongMaterial({color: 0xff6600}));
+            npc.position.set(5, 1, -10); // موقع الحارس
+            scene.add(npc);
+
+            // اللاعب
             const player = new THREE.Group();
-            const pBody = new THREE.Mesh(
-                new THREE.BoxGeometry(0.6, 1.5, 0.4), 
-                new THREE.MeshPhongMaterial({color: 0x0066ff})
-            );
+            const pBody = new THREE.Mesh(new THREE.BoxGeometry(0.6, 1.5, 0.4), new THREE.MeshPhongMaterial({color: 0x0066ff}));
             pBody.position.y = 0.75;
             player.add(pBody);
             scene.add(player);
 
-            let vY = 0;
-            let canJump = false;
+            let vY = 0, canJump = false;
             const keys = {};
-
             window.onkeydown = (e) => keys[e.code] = true;
             window.onkeyup = (e) => keys[e.code] = false;
 
             function animate() {
                 requestAnimationFrame(animate);
 
-                // الجاذبية والقفز
                 vY -= 0.01;
                 player.position.y += vY;
-                if(player.position.y <= 0) {
-                    player.position.y = 0;
-                    vY = 0;
-                    canJump = true;
-                }
+                if(player.position.y <= 0) { player.position.y = 0; vY = 0; canJump = true; }
+                if(keys['Space'] && canJump) { vY = 0.2; canJump = false; }
 
-                if(keys['Space'] && canJump) {
-                    vY = 0.2;
-                    canJump = false;
-                }
-
-                // الحركة
                 if (keys['KeyW']) player.translateZ(-0.15);
                 if (keys['KeyS']) player.translateZ(0.15);
                 if (keys['KeyA']) player.rotation.y += 0.05;
                 if (keys['KeyD']) player.rotation.y -= 0.05;
 
-                // الكاميرا
+                // كشف المسافة بين اللاعب و NPC
+                const distance = player.position.distanceTo(npc.position);
+                const dialog = document.getElementById('dialog-box');
+                
+                if(distance < 3) {
+                    dialog.style.display = 'block';
+                } else {
+                    dialog.style.display = 'none';
+                }
+
                 const offset = new THREE.Vector3(0, 4, 8).applyMatrix4(player.matrixWorld);
                 camera.position.lerp(offset, 0.1);
                 camera.lookAt(player.position.x, player.position.y + 1, player.position.z);
 
-                document.getElementById('pos').innerText = `X: ${player.position.x.toFixed(1)} Z: ${player.position.z.toFixed(1)}`;
                 renderer.render(scene, camera);
             }
             animate();
