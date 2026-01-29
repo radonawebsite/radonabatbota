@@ -3,171 +3,81 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Memorable Events | القمة في تنظيم الحفلات</title>
+    <title>Memorable Events | Luxury Legacy</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@200;700;900&display=swap" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cairo:wght@300;600;900&display=swap');
-        
-        :root { --pink: #ffb7c5; --gold: #d4af37; --dark: #050505; }
-        body { background: var(--dark); color: white; font-family: 'Cairo', sans-serif; overflow-x: hidden; }
-        h1, h2, .luxury-font { font-family: 'Cinzel', serif; }
-
-        /* تأثيرات 3D مذهلة */
-        #bg-canvas { position: fixed; top: 0; left: 0; z-index: -1; }
-        .glass-card { 
-            background: rgba(255, 255, 255, 0.03); 
-            backdrop-filter: blur(15px); 
-            border: 1px solid rgba(255, 183, 197, 0.1);
-            transition: 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
-        }
-        .glass-card:hover { 
-            transform: perspective(1000px) rotateY(5deg) translateY(-10px);
-            border-color: var(--pink);
-            box-shadow: 0 20px 40px rgba(255, 183, 197, 0.1);
-        }
-
-        .pink-glow { text-shadow: 0 0 20px rgba(255, 183, 197, 0.5); color: var(--pink); }
-        .nav-link { position: relative; transition: 0.3s; }
-        .nav-link::after { content: ''; position: absolute; bottom: -5px; right: 0; width: 0; height: 2px; background: var(--pink); transition: 0.3s; }
-        .nav-link:hover::after { width: 100%; }
-
-        .btn-luxury {
-            background: linear-gradient(45deg, var(--pink), #e5b2ca);
-            color: var(--dark);
-            box-shadow: 0 10px 20px rgba(255, 183, 197, 0.3);
-            transition: 0.4s;
-        }
-        .btn-luxury:hover { transform: scale(1.05) translateY(-3px); box-shadow: 0 15px 30px rgba(255, 183, 197, 0.5); }
+        body { margin: 0; background: #000; color: white; font-family: 'Cairo', sans-serif; overflow-x: hidden; }
+        canvas { position: fixed; top: 0; left: 0; z-index: -1; }
+        .pink-glow { color: #ffb7c5; text-shadow: 0 0 15px rgba(255,183,197,0.6); }
+        .glass-card { background: rgba(255,255,255,0.02); backdrop-filter: blur(10px); border: 1px solid rgba(255,183,197,0.1); border-radius: 30px; transition: 0.5s; }
+        .glass-card:hover { transform: translateY(-10px); border-color: #ffb7c5; }
+        .btn-luxury { background: #ffb7c5; color: #000; font-weight: 900; padding: 15px 40px; border-radius: 50px; transition: 0.4s; }
+        .btn-luxury:hover { transform: scale(1.1); box-shadow: 0 0 30px rgba(255,183,197,0.5); }
     </style>
 </head>
 <body>
-    <canvas id="bg-canvas"></canvas>
-
-    <nav class="fixed w-full z-50 p-6 backdrop-blur-lg border-b border-white/5">
-        <div class="container mx-auto flex justify-between items-center">
-            <div class="flex items-center gap-4">
-                <img src="logo.png" alt="Logo" class="h-14 filter drop-shadow(0 0 10px var(--pink))">
-                <span class="luxury-font text-2xl font-bold tracking-tighter pink-glow">MEMORABLE</span>
-            </div>
-            <div class="hidden md:flex space-x-reverse space-x-8 font-semibold text-sm tracking-widest">
-                <a href="#home" class="nav-link">الرئيسية</a>
-                <a href="#services" class="nav-link">خدماتنا</a>
-                <a href="#gallery" class="nav-link">المعرض</a>
-                <a href="#contact" class="btn-luxury px-6 py-2 rounded-full">احجز الآن</a>
-            </div>
+    <canvas id="bg"></canvas>
+    <nav class="p-8 flex justify-between items-center fixed w-full z-50 bg-black/50 backdrop-blur-md">
+        <div class="flex items-center gap-4">
+            <img src="logo.png" alt="Logo" class="h-14 border border-[#ffb7c5] rounded-full p-1">
+            <span class="text-2xl font-black pink-glow">MEMORABLE EVENTS</span>
+        </div>
+        <div class="hidden md:flex gap-10 text-xs font-bold uppercase tracking-widest">
+            <a href="#home" class="hover:text-[#ffb7c5]">الرئيسية</a>
+            <a href="#services" class="hover:text-[#ffb7c5]">الخدمات</a>
+            <a href="#booking" class="hover:text-[#ffb7c5]">الحجز</a>
         </div>
     </nav>
 
-    <section id="home" class="h-screen flex items-center justify-center text-center px-4">
-        <div data-aos="zoom-out" data-aos-duration="2000">
-            <img src="logo.png" class="h-48 mx-auto mb-10 animate-pulse drop-shadow-[0_0_30px_rgba(255,183,197,0.4)]">
-            <h1 class="text-6xl md:text-9xl font-black mb-6">عصر <span class="pink-glow">الأناقة</span></h1>
-            <p class="text-gray-400 text-xl tracking-[0.5em] uppercase mb-10">Luxury Event Planning & Design</p>
-            <div class="flex gap-6 justify-center">
-                <a href="#services" class="btn-luxury px-10 py-4 rounded-sm font-bold uppercase text-xs">اكتشف خدماتنا</a>
-            </div>
+    <section id="home" class="h-screen flex flex-col items-center justify-center text-center px-6">
+        <img src="logo.png" class="h-48 mb-10 drop-shadow-[0_0_30px_#ffb7c5]">
+        <h1 class="text-6xl md:text-9xl font-black mb-6">عالم من <span class="pink-glow">الخيال</span></h1>
+        <p class="text-gray-400 max-w-2xl text-xl font-light">نحول مناسباتكم العادية إلى قصص أسطورية تروى عبر الأجيال.</p>
+        <a href="#booking" class="btn-luxury mt-12">احجز ليلتك الآن</a>
+    </section>
+
+    <section id="services" class="py-32 container mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-12">
+        <div class="glass-card p-12 text-center">
+            <h3 class="text-3xl font-bold mb-6 pink-glow">أعراس ملكية</h3>
+            <p class="text-gray-400 leading-relaxed">تنظيم أدق التفاصيل لليلة العمر، من الإضاءة إلى الموسيقى والديكور الساحر.</p>
+        </div>
+        <div class="glass-card p-12 text-center border-[#ffb7c5]/30">
+            <h3 class="text-3xl font-bold mb-6 pink-glow">حفلات خاصة</h3>
+            <p class="text-gray-400 leading-relaxed">أعياد ميلاد وذكرى سنوية بأجواء لا يمكن نسيانها، مصممة خصيصاً لكم.</p>
+        </div>
+        <div class="glass-card p-12 text-center">
+            <h3 class="text-3xl font-bold mb-6 pink-glow">فعاليات فاخرة</h3>
+            <p class="text-gray-400 leading-relaxed">إطلاق المنتجات وحفلات الشركات بلمسة من الفخامة والاحترافية العالمية.</p>
         </div>
     </section>
 
-    <section id="services" class="py-32 container mx-auto px-6">
-        <h2 class="text-5xl text-center mb-24 luxury-font" data-aos="fade-up">خدماتنا الملكية</h2>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
-            <div class="glass-card p-10 rounded-3xl" data-aos="fade-up" data-aos-delay="100">
-                <i class="fa-solid fa-crown text-4xl text-[#ffb7c5] mb-6"></i>
-                <h3 class="text-2xl font-bold mb-4">أعراس ملكية</h3>
-                <p class="text-gray-400">نصمم ليلة العمر بأدق التفاصيل التي تحاكي أحلامكم الخيالية.</p>
-            </div>
-            <div class="glass-card p-10 rounded-3xl border-pink-200/20" data-aos="fade-up" data-aos-delay="200">
-                <i class="fa-solid fa-masks-theater text-4xl text-[#ffb7c5] mb-6"></i>
-                <h3 class="text-2xl font-bold mb-4">حفلات خاصة</h3>
-                <p class="text-gray-400">أعياد ميلاد ومناسبات عائلية بأجواء ساحرة لا تنسى.</p>
-            </div>
-            <div class="glass-card p-10 rounded-3xl" data-aos="fade-up" data-aos-delay="300">
-                <i class="fa-solid fa-building-columns text-4xl text-[#ffb7c5] mb-6"></i>
-                <h3 class="text-2xl font-bold mb-4">مؤتمرات فخمة</h3>
-                <p class="text-gray-400">تنظيم الشركات والفعاليات الرسمية بلمسة احترافية عصرية.</p>
-            </div>
-        </div>
-    </section>
-
-    <section id="gallery" class="py-32 bg-white/5">
-        <div class="container mx-auto px-6 text-center">
-            <h2 class="text-5xl mb-16 luxury-font" data-aos="fade-right">من أعمالنا</h2>
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div class="overflow-hidden rounded-xl h-80 glass-card" data-aos="zoom-in"><img src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&w=500" class="w-full h-full object-cover opacity-60 hover:opacity-100 transition duration-700"></div>
-                <div class="overflow-hidden rounded-xl h-80 glass-card" data-aos="zoom-in" data-aos-delay="100"><img src="https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&w=500" class="w-full h-full object-cover opacity-60 hover:opacity-100 transition duration-700"></div>
-                <div class="overflow-hidden rounded-xl h-80 glass-card" data-aos="zoom-in" data-aos-delay="200"><img src="https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?auto=format&fit=crop&w=500" class="w-full h-full object-cover opacity-60 hover:opacity-100 transition duration-700"></div>
-                <div class="overflow-hidden rounded-xl h-80 glass-card" data-aos="zoom-in" data-aos-delay="300"><img src="https://images.unsplash.com/photo-1505236858219-8359eb29e329?auto=format&fit=crop&w=500" class="w-full h-full object-cover opacity-60 hover:opacity-100 transition duration-700"></div>
-            </div>
-        </div>
-    </section>
-
-    <section id="contact" class="py-32 container mx-auto px-6 max-w-4xl">
-        <div class="glass-card p-12 rounded-[40px]" data-aos="flip-up">
-            <h2 class="text-4xl text-center mb-10 pink-glow">احجز موعدك الملكي</h2>
-            <form class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <input type="text" placeholder="الاسم الكامل" class="bg-white/5 border border-white/10 p-4 rounded-xl focus:border-[#ffb7c5] outline-none transition">
-                <input type="email" placeholder="البريد الإلكتروني" class="bg-white/5 border border-white/10 p-4 rounded-xl focus:border-[#ffb7c5] outline-none transition">
-                <select class="bg-white/5 border border-white/10 p-4 rounded-xl focus:border-[#ffb7c5] outline-none transition md:col-span-2">
-                    <option class="bg-black">نوع المناسبة</option>
-                    <option class="bg-black">زفاف</option>
-                    <option class="bg-black">عيد ميلاد</option>
-                    <option class="bg-black">لقاء عمل</option>
-                </select>
-                <textarea placeholder="رسالتك الخاصة..." class="bg-white/5 border border-white/10 p-4 rounded-xl focus:border-[#ffb7c5] outline-none transition md:col-span-2 h-32"></textarea>
-                <button class="btn-luxury md:col-span-2 py-4 rounded-xl font-black text-lg">إرسال الطلب</button>
-            </form>
-        </div>
-    </section>
-
-    <footer class="py-20 border-t border-white/5 text-center">
-        <img src="logo.png" class="h-20 mx-auto mb-8 opacity-50">
-        <div class="flex justify-center gap-8 mb-10 text-2xl">
-            <a href="#" class="hover:text-[#ffb7c5] transition"><i class="fa-brands fa-instagram"></i></a>
-            <a href="#" class="hover:text-[#ffb7c5] transition"><i class="fa-brands fa-whatsapp"></i></a>
-            <a href="#" class="hover:text-[#ffb7c5] transition"><i class="fa-brands fa-facebook"></i></a>
-        </div>
-        <p class="text-gray-600 text-sm tracking-widest">&copy; 2026 MEMORABLE EVENTS. ALL RIGHTS RESERVED.</p>
-    </footer>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script>
-        AOS.init({ duration: 1000, once: true });
-
-        // خلفية الفضاء الوردي 3D
         const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('bg-canvas'), alpha: true, antialias: true });
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ canvas: document.querySelector('#bg'), antialias: true, alpha: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
-
-        const starGeo = new THREE.BufferGeometry();
-        const starPos = [];
-        for(let i=0; i<6000; i++) {
-            starPos.push(Math.random()*2000-1000, Math.random()*2000-1000, Math.random()*2000-1000);
-        }
-        starGeo.setAttribute('position', new THREE.Float32BufferAttribute(starPos, 3));
-        const starMat = new THREE.PointsMaterial({ color: 0xffb7c5, size: 1, transparent: true, opacity: 0.6 });
-        const starPoints = new THREE.Points(starGeo, starMat);
-        scene.add(starPoints);
-
-        camera.position.z = 1;
-
+        
+        const geo = new THREE.BufferGeometry();
+        const pts = [];
+        for(let i=0; i<8000; i++) pts.push(THREE.MathUtils.randFloatSpread(2000), THREE.MathUtils.randFloatSpread(2000), THREE.MathUtils.randFloatSpread(2000));
+        geo.setAttribute('position', new THREE.Float32BufferAttribute(pts, 3));
+        const stars = new THREE.Points(geo, new THREE.PointsMaterial({ color: 0xffb7c5, size: 0.8 }));
+        scene.add(stars);
+        
+        camera.position.z = 100;
         function animate() {
             requestAnimationFrame(animate);
-            starPoints.rotation.y += 0.0005;
-            starPoints.rotation.x += 0.0002;
+            stars.rotation.y += 0.0005;
             renderer.render(scene, camera);
         }
         animate();
-
-        window.addEventListener('resize', () => {
+        window.onresize = () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
-        });
+        };
     </script>
 </body>
 </html>
