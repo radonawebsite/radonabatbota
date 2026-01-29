@@ -1,63 +1,100 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>REDA PROJECT - STEP 2</title>
+    <title>REDA PROJECT - STEP 3</title>
     <style>
-        body { margin: 0; overflow: hidden; background: #000; }
-        #ui { position: absolute; top: 10px; left: 10px; color: white; font-family: sans-serif; background: rgba(0,0,0,0.6); padding: 15px; border-radius: 8px; border-left: 4px solid #00ff00; }
+        body { margin: 0; overflow: hidden; background: #87CEEB; }
+        #ui { position: absolute; top: 10px; left: 10px; color: white; font-family: sans-serif; background: rgba(0,0,0,0.6); padding: 15px; border-radius: 8px; border-left: 4px solid #ffcc00; }
     </style>
 </head>
 <body>
     <div id="ui">
-        <b>REDA WORLD - Phase 2</b><br>
-        التحكم: WASD أو الأسهم<br>
-        الحالة: نظام الحركة مفعل ✅
+        <b>REDA WORLD - Phase 3</b><br>
+        التحكم: WASD + Space للقفز<br>
+        الحالة: الجاذبية والبيئة مفعّلة 🌳
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script>
         const scene = new THREE.Scene();
         scene.background = new THREE.Color(0x87CEEB);
+        scene.fog = new THREE.Fog(0x87CEEB, 5, 50); // ضباب باش يعطي جمالية وبعد
+
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true; // تفعيل الظلال
         document.body.appendChild(renderer.domElement);
 
-        // إضاءة خفيفة باش يبان الشكل ثلاثي الأبعاد
-        const light = new THREE.DirectionalLight(0xffffff, 1);
-        light.position.set(5, 10, 7.5);
-        scene.add(light, new THREE.AmbientLight(0x404040));
+        // إضاءة شمسية قوية مع ظلال
+        const sun = new THREE.DirectionalLight(0xffffff, 1);
+        sun.position.set(10, 20, 10);
+        sun.castShadow = true;
+        scene.add(sun, new THREE.AmbientLight(0x707070));
 
-        // الأرضية (درنا فيها شبكة Grid باش تحس بالحركة)
-        const grid = new THREE.GridHelper(100, 100, 0x000000, 0x555555);
-        scene.add(grid);
-        const ground = new THREE.Mesh(new THREE.PlaneGeometry(100, 100), new THREE.MeshPhongMaterial({color: 0x228B22}));
+        // الأرضية
+        const ground = new THREE.Mesh(
+            new THREE.PlaneGeometry(200, 200), 
+            new THREE.MeshPhongMaterial({color: 0x348C31})
+        );
         ground.rotation.x = -Math.PI / 2;
+        ground.receiveShadow = true;
         scene.add(ground);
 
-        // اللاعب (دابا درناه طويل شوية بحال الشخصية)
+        // صنع "غابة" عشوائية
+        for(let i=0; i<60; i++) {
+            const treeGroup = new THREE.Group();
+            const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 1), new THREE.MeshPhongMaterial({color: 0x8B4513}));
+            const leaves = new THREE.Mesh(new THREE.ConeGeometry(1, 2, 8), new THREE.MeshPhongMaterial({color: 0x228B22}));
+            leaves.position.y = 1.5;
+            treeGroup.add(trunk, leaves);
+            treeGroup.position.set(Math.random()*100-50, 0.5, Math.random()*100-50);
+            scene.add(treeGroup);
+        }
+
+        // اللاعب
         const player = new THREE.Group();
-        const body = new THREE.Mesh(new THREE.BoxGeometry(0.6, 1.2, 0.4), new THREE.MeshPhongMaterial({color: 0xff0000}));
-        body.position.y = 0.6;
-        player.add(body);
+        const pBody = new THREE.Mesh(new THREE.CapsuleGeometry(0.4, 0.8, 4, 8), new THREE.MeshPhongMaterial({color: 0x0066ff}));
+        pBody.position.y = 0.8;
+        pBody.castShadow = true;
+        player.add(pBody);
         scene.add(player);
 
-        // نظام التحكم
+        // متغيرات الفيزياء
+        let velocityY = 0;
+        let isGrounded = true;
         const keys = {};
+
         window.addEventListener('keydown', (e) => keys[e.code] = true);
         window.addEventListener('keyup', (e) => keys[e.code] = false);
 
         function animate() {
             requestAnimationFrame(animate);
 
-            // منطق الحركة
-            const speed = 0.1;
-            if (keys['KeyW'] || keys['ArrowUp']) player.translateZ(-speed);
-            if (keys['KeyS'] || keys['ArrowDown']) player.translateZ(speed);
-            if (keys['KeyA'] || keys['ArrowLeft']) player.rotation.y += 0.05;
-            if (keys['KeyD'] || keys['ArrowRight']) player.rotation.y -= 0.05;
+            // الجاذبية (Gravity)
+            velocityY -= 0.01; 
+            player.position.y += velocityY;
 
-            // الكاميرا الذكية (كتتبع اللاعب من اللور)
+            if(player.position.y <= 0) {
+                player.position.y = 0;
+                velocityY = 0;
+                isGrounded = true;
+            }
+
+            // القفز
+            if(keys['Space'] && isGrounded) {
+                velocityY = 0.2;
+                isGrounded = false;
+            }
+
+            // الحركة
+            const speed = 0.15;
+            if (keys['KeyW']) player.translateZ(-speed);
+            if (keys['KeyS']) player.translateZ(speed);
+            if (keys['KeyA']) player.rotation.y += 0.04;
+            if (keys['KeyD']) player.rotation.y -= 0.04;
+
+            // تتبع الكاميرا
             const offset = new THREE.Vector3(0, 3, 6).applyMatrix4(player.matrixWorld);
             camera.position.lerp(offset, 0.1);
             camera.lookAt(player.position.x, player.position.y + 1, player.position.z);
@@ -65,12 +102,6 @@
             renderer.render(scene, camera);
         }
         animate();
-
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
     </script>
 </body>
 </html>
