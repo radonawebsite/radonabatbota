@@ -3,60 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Spotify Premium Generator | تفعيل سبوتيفاي</title>
+    <title>Spotify Premium | مولد البطاقات</title>
     <style>
-        body { background: #121212; color: #1DB954; font-family: 'Segoe UI', sans-serif; text-align: center; padding: 20px; }
-        .spotify-card { background: #000; border: 1px solid #1DB954; border-radius: 15px; padding: 30px; display: inline-block; max-width: 450px; width: 100%; box-shadow: 0 0 25px rgba(29, 185, 84, 0.3); }
-        h1 { color: #fff; margin-bottom: 5px; }
-        .bin-info { color: #888; font-size: 0.8em; margin-bottom: 20px; }
-        .card-output { background: #181818; padding: 15px; border-radius: 10px; margin: 15px 0; border: 1px dashed #1DB954; font-family: monospace; font-size: 1.2em; color: #fff; }
-        button { background: #1DB954; color: #fff; border: none; padding: 15px 30px; border-radius: 30px; font-weight: bold; cursor: pointer; width: 100%; font-size: 1.1em; }
-        button:hover { transform: scale(1.02); background: #1ed760; }
-        .notice { margin-top: 20px; font-size: 0.8em; color: #ef5350; }
-        .buy-premium { margin-top: 25px; padding-top: 15px; border-top: 1px solid #333; }
-        .buy-premium a { color: #fff; text-decoration: none; font-weight: bold; border: 1px solid #fff; padding: 5px 10px; border-radius: 5px; }
+        body { background: #121212; color: #1DB954; font-family: 'Segoe UI', sans-serif; text-align: center; padding: 15px; }
+        .main-box { background: #000; border: 1px solid #1DB954; border-radius: 15px; padding: 25px; display: inline-block; max-width: 450px; width: 100%; box-shadow: 0 0 20px #1DB954; }
+        .card-out { background: #181818; padding: 15px; border-radius: 8px; margin: 15px 0; border: 1px dashed #1DB954; font-family: monospace; font-size: 1.1em; color: #fff; }
+        button { background: #1DB954; color: #fff; border: none; padding: 12px; border-radius: 25px; font-weight: bold; cursor: pointer; width: 100%; margin-bottom: 15px; }
+        .steps { text-align: right; background: #111; padding: 15px; border-radius: 10px; font-size: 0.85em; color: #ccc; margin-top: 15px; }
+        .steps b { color: #1DB954; }
+        .whatsapp-btn { background: #25D366; color: white; padding: 10px; border-radius: 10px; display: block; text-decoration: none; margin-top: 20px; font-weight: bold; }
     </style>
 </head>
 <body>
 
-    <div class="spotify-card">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/1/19/Spotify_logo_without_text.svg" width="50" alt="Spotify">
-        <h1>Spotify Card Gen</h1>
-        <p class="bin-info">BIN: 539121 (USA/Global) - يعمل حالياً</p>
-
-        <div class="card-output" id="cardDisplay">
-            5391 21XX XXXX 8842
-        </div>
+    <div class="main-box">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/1/19/Spotify_logo_without_text.svg" width="40" alt="Spotify">
+        <h2>Spotify Card Gen v2</h2>
         
-        <div id="extraInfo" style="color: #888; font-family: monospace; margin-bottom: 15px;">
-            EXP: 12/27 | CVV: 541
+        <div class="card-out" id="cardOut">5391 21XX XXXX 4452</div>
+        <div id="extra" style="color: #888; margin-bottom: 10px;">EXP: 05/27 | CVV: 774</div>
+        
+        <button onclick="gen()">توليد بطاقة تفعيل</button>
+
+        <div class="steps">
+            <b>طريقة التفعيل:</b><br>
+            1. شغل <b>VPN</b> على دولة ميريكان (USA).<br>
+            2. افتح حساب Spotify جديد بنفس الدولة.<br>
+            3. استخدم الـ <b>Zip Code: 10001</b> عند الدفع.<br>
+            4. مبروك عليك Spotify Premium!
         </div>
 
-        <button onclick="generateSpotifyCard()">توليد بطاقة جديدة</button>
-
-        <p class="notice">★ هذه البطاقات تستخدم لتجاوز صفحة الدفع في الفترة التجريبية فقط.</p>
-
-        <div class="buy-premium">
-            <p style="color: #fff;">واش بغيتي حساب تفعيل حقيقي 100%؟</p>
-            <a href="https://wa.me/212600000000">اشتري حساب 3 أشهر بـ 15 درهم فقط</a>
-        </div>
+        <a href="https://wa.me/2126XXXXXXXX" class="whatsapp-btn">إيلا ما عرفتيش تفعله.. نصاوبوه ليك بـ 15 درهم</a>
     </div>
 
     <script>
-        function generateSpotifyCard() {
-            // BIN مخصص لسبوتيفاي (كمثال)
+        function gen() {
             let bin = "539121";
-            let part1 = Math.floor(10 + Math.random() * 89);
-            let part2 = Math.floor(1000 + Math.random() * 8999);
-            let part3 = Math.floor(1000 + Math.random() * 8999);
-            
-            let fullCard = `${bin}${part1}${part2}${part3}`;
-            let cvv = Math.floor(100 + Math.random() * 899);
-            let month = Math.floor(1 + Math.random() * 12).toString().padStart(2, '0');
-            let year = 2026 + Math.floor(Math.random() * 4);
-
-            document.getElementById('cardDisplay').innerText = fullCard.match(/.{1,4}/g).join(' ');
-            document.getElementById('extraInfo').innerText = `EXP: ${month}/${year} | CVV: ${cvv}`;
+            let r = () => Math.floor(1000 + Math.random() * 9000);
+            let full = bin + r().toString().substring(0,2) + r() + r();
+            document.getElementById('cardOut').innerText = full.match(/.{1,4}/g).join(' ');
+            document.getElementById('extra').innerText = `EXP: 0${Math.floor(Math.random()*9+1)}/2${Math.floor(Math.random()*4+6)} | CVV: ${Math.floor(Math.random()*899+100)}`;
         }
     </script>
 </body>
