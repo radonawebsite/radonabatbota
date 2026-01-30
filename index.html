@@ -1,337 +1,86 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Radona Nexus | Digital Frontiers</title>
+    <title>تجربة خيالية 3D</title>
     <style>
-        :root {
-            --primary-glow: #00eaff; /* Cyan */
-            --secondary-glow: #ff00ea; /* Magenta */
-            --dark-bg: #0d0f1c;
-            --glass-card: rgba(255, 255, 255, 0.08);
-            --border-glow: rgba(0, 234, 255, 0.4);
-        }
-
-        body {
-            margin: 0;
-            background: var(--dark-bg);
-            color: #e0e0e0;
-            font-family: 'Roboto Mono', monospace; /* خط عصري تقني */
-            overflow-x: hidden;
-            perspective: 1px; /* للـ Parallax Scrolling */
-            transform-style: preserve-3d;
-            height: 100vh;
-        }
-
-        /* Particles/Stars Background (JS handles creation) */
-        .particle-bg {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            z-index: -2;
-            pointer-events: none;
-        }
-
-        /* Parallax Layer for Deep Space */
-        .parallax-layer {
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background-size: cover;
-            background-position: center;
-            transform-origin: 0 0;
-            z-index: -1;
-        }
-        .layer-far {
-            background-image: url('https://raw.githubusercontent.com/RadonaDev/assets/main/space-nebula.webp'); /* صورة سديم */
-            transform: translateZ(-2px) scale(3);
-        }
-        .layer-mid {
-            background-image: url('https://raw.githubusercontent.com/RadonaDev/assets/main/stars-field.webp'); /* حقل نجوم */
-            transform: translateZ(-1px) scale(2);
-        }
-
-        header {
-            position: relative;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            background: rgba(0,0,0,0.3); /* طبقة شفافة فوق البارالاكس */
-        }
-        h1 {
-            font-size: 4em;
-            text-transform: uppercase;
-            letter-spacing: 10px;
-            color: #fff;
-            text-shadow: 0 0 20px var(--primary-glow), 0 0 40px var(--primary-glow);
-            margin-bottom: 20px;
-            animation: fadeIn 2s ease-out;
-        }
-        p.tagline {
-            font-size: 1.5em;
-            color: #b0c4de;
-            animation: slideIn 2.5s ease-out;
-        }
-        .cta-button {
-            background: linear-gradient(45deg, var(--primary-glow), var(--secondary-glow));
-            border: none;
-            padding: 18px 45px;
-            border-radius: 50px;
-            color: var(--dark-bg);
-            font-size: 1.2em;
-            font-weight: bold;
-            cursor: pointer;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            box-shadow: 0 0 25px var(--primary-glow);
-            transition: all 0.4s ease;
-            margin-top: 40px;
-        }
-        .cta-button:hover {
-            box-shadow: 0 0 40px var(--primary-glow), 0 0 60px var(--secondary-glow);
-            transform: scale(1.05);
-        }
-
-        /* Product Section */
-        .section {
-            padding: 80px 40px;
-            position: relative;
-            z-index: 1; /* باش يكون فوق البارالاكس */
-            background: rgba(13, 15, 28, 0.8); /* خلفية شبه شفافة للسكشن */
-            border-top: 1px solid rgba(0, 234, 255, 0.2);
-        }
-        .section-title {
-            font-size: 3em;
-            text-align: center;
-            color: var(--primary-glow);
-            text-shadow: 0 0 15px var(--primary-glow);
-            margin-bottom: 60px;
-        }
-        .product-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 60px;
-            max-width: 1200px;
-            margin: auto;
-        }
-        .product-card {
-            background: var(--glass-card);
-            backdrop-filter: blur(10px);
-            border-radius: 25px;
-            padding: 30px;
-            text-align: center;
-            border: 1px solid var(--border-glow);
-            box-shadow: 0 0 15px rgba(0, 234, 255, 0.1);
-            transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94); /* Smooth Cubic Bezier */
-            position: relative;
-            overflow: hidden;
-        }
-        .product-card::before {
-            content: '';
-            position: absolute;
-            top: -100px; left: -100px;
-            width: 200px; height: 200px;
-            background: radial-gradient(circle, var(--primary-glow) 0%, transparent 70%);
-            opacity: 0;
-            transition: opacity 0.5s ease-out, transform 0.5s ease-out;
-            pointer-events: none;
-            z-index: -1;
-        }
-        .product-card:hover {
-            transform: translateY(-20px) scale(1.03);
-            box-shadow: 0 0 40px var(--primary-glow), 0 0 60px var(--secondary-glow);
-        }
-        .product-card:hover::before {
-            opacity: 0.3;
-            transform: scale(2);
-        }
-
-        .product-icon {
-            font-size: 4em;
-            color: var(--primary-glow);
-            margin-bottom: 20px;
-            text-shadow: 0 0 10px var(--primary-glow);
-        }
-        .product-title {
-            font-size: 1.8em;
-            color: #fff;
-            margin-bottom: 10px;
-            letter-spacing: 1px;
-        }
-        .product-description {
-            color: #b0c4de;
-            font-size: 0.9em;
-            margin-bottom: 25px;
-        }
-        .product-price {
-            font-size: 2.2em;
-            color: var(--secondary-glow);
-            font-weight: bold;
-            text-shadow: 0 0 10px var(--secondary-glow);
-            margin-bottom: 25px;
-        }
-        .buy-now-btn {
-            background: linear-gradient(90deg, var(--secondary-glow), var(--primary-glow));
-            border: none;
-            padding: 15px 40px;
-            border-radius: 40px;
-            color: var(--dark-bg);
-            font-weight: bold;
-            font-size: 1.1em;
-            cursor: pointer;
-            transition: all 0.4s ease;
-            box-shadow: 0 0 15px var(--secondary-glow);
-        }
-        .buy-now-btn:hover {
-            box-shadow: 0 0 30px var(--secondary-glow), 0 0 40px var(--primary-glow);
-            transform: scale(1.08);
-        }
-
-        /* Keyframe Animations */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateX(-50px); }
-            to { opacity: 1; transform: translateX(0); }
-        }
-
-        /* Scroll Progress Indicator (Added for futuristic feel) */
-        #scroll-progress {
-            position: fixed;
-            top: 0; left: 0;
-            width: 0%; height: 5px;
-            background: linear-gradient(90deg, var(--primary-glow), var(--secondary-glow));
-            z-index: 1000;
-        }
+        body { margin: 0; overflow: hidden; background-color: #000; }
+        canvas { display: block; }
     </style>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto+Mono:wght@300;400;700&display=swap" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/js/all.min.js"></script>
 </head>
 <body>
 
-    <div id="scroll-progress"></div>
-    <div class="parallax-layer layer-far"></div>
-    <div class="parallax-layer layer-mid"></div>
-    <div class="particle-bg" id="particle-canvas"></div>
-
-    <header>
-        <h1>RADONA NEXUS</h1>
-        <p class="tagline">Explore the Unseen. Acquire the Unrivaled.</p>
-        <button class="cta-button" onclick="scrollToSection('products')">ACCESS THE CORE</button>
-    </header>
-
-    <div class="section" id="products">
-        <h2 class="section-title">Quantum Innovations</h2>
-        <div class="product-grid">
-            
-            <div class="product-card" onmousemove="handleMouseMove(event, this)">
-                <div class="product-icon"><i class="fas fa-microchip"></i></div>
-                <h3 class="product-title">Neuro-Synthesizer</h3>
-                <p class="product-description">Direct thought-to-digital interface. Enhance your cognitive output.</p>
-                <div class="product-price">3.2 ETH</div>
-                <button class="buy-now-btn">Acquire System</button>
-            </div>
-
-            <div class="product-card" onmousemove="handleMouseMove(event, this)">
-                <div class="product-icon"><i class="fas fa-globe"></i></div>
-                <h3 class="product-title">Chronosphere Compass</h3>
-                <p class="product-description">Navigate temporal distortions with unparalleled precision.</p>
-                <div class="product-price">1.8 ETH</div>
-                <button class="buy-now-btn">Acquire System</button>
-            </div>
-
-            <div class="product-card" onmousemove="handleMouseMove(event, this)">
-                <div class="product-icon"><i class="fas fa-rocket"></i></div>
-                <h3 class="product-title">Void Jumper Drive</h3>
-                <p class="product-description">Instantaneous displacement across interstellar distances.</p>
-                <div class="product-price">7.5 ETH</div>
-                <button class="buy-now-btn">Acquire System</button>
-            </div>
-            
-        </div>
-    </div>
-
-    <script>
-        // Smooth Scroll
-        function scrollToSection(id) {
-            document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
-        }
-
-        // Mouse Glow Effect on Cards
-        function handleMouseMove(e, card) {
-            const rect = card.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            card.style.setProperty('--x', `${x}px`);
-            card.style.setProperty('--y', `${y}px`);
-            card.style.setProperty('--card-glow', `radial-gradient(circle at ${x}px ${y}px, rgba(0, 234, 255, 0.3) 0%, transparent 70%)`);
-            card.style.background = `linear-gradient(rgba(13, 15, 28, 0.8), rgba(13, 15, 28, 0.8)), var(--card-glow)`;
-        }
-
-        // Particle Background (Simple JS Particles)
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-        document.getElementById('particle-canvas').appendChild(canvas);
-        let particles = [];
-        const numParticles = 80;
-
-        function resizeCanvas() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        }
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
-
-        function createParticle() {
-            return {
-                x: Math.random() * canvas.width,
-                y: Math.random() * canvas.height,
-                radius: Math.random() * 1.5 + 0.5,
-                color: `rgba(0, 234, 255, ${Math.random() * 0.7 + 0.3})`,
-                speedX: (Math.random() - 0.5) * 0.5,
-                speedY: (Math.random() - 0.5) * 0.5
-            };
-        }
-
-        function initParticles() {
-            for (let i = 0; i < numParticles; i++) {
-                particles.push(createParticle());
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js"
             }
         }
+    </script>
 
-        function animateParticles() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            for (let i = 0; i < particles.length; i++) {
-                let p = particles[i];
-                p.x += p.speedX;
-                p.y += p.speedY;
+    <script type="module">
+        import * as THREE from 'three';
 
-                if (p.x < 0 || p.x > canvas.width) p.speedX *= -1;
-                if (p.y < 0 || p.y > canvas.height) p.speedY *= -1;
+        // 1. إعداد المشهد (Scene)
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
 
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-                ctx.fillStyle = p.color;
-                ctx.fill();
-            }
-            requestAnimationFrame(animateParticles);
+        // 2. إضافة النجوم (Stars)
+        const starGeometry = new THREE.BufferGeometry();
+        const starMaterial = new THREE.PointsMaterial({ color: 0xffffff });
+        const starVertices = [];
+        for (let i = 0; i < 10000; i++) {
+            const x = (Math.random() - 0.5) * 2000;
+            const y = (Math.random() - 0.5) * 2000;
+            const z = -Math.random() * 2000;
+            starVertices.push(x, y, z);
+        }
+        starGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starVertices, 3));
+        const stars = new THREE.Points(starGeometry, starMaterial);
+        scene.add(stars);
+
+        // 3. إضافة كوكب خيالي (The Planet)
+        const geometry = new THREE.IcosahedronGeometry(1, 15);
+        const material = new THREE.MeshStandardMaterial({ 
+            color: 0x44aa88, 
+            wireframe: true,
+            emissive: 0x112244
+        });
+        const planet = new THREE.Mesh(geometry, material);
+        scene.add(planet);
+
+        // 4. الإضاءة (Lighting)
+        const light = new THREE.PointLight(0xffffff, 50, 100);
+        light.position.set(5, 5, 5);
+        scene.add(light);
+        scene.add(new THREE.AmbientLight(0x333333));
+
+        camera.position.z = 3;
+
+        // 5. وظيفة التحريك (Animation)
+        function animate() {
+            requestAnimationFrame(animate);
+
+            planet.rotation.y += 0.005;
+            planet.rotation.x += 0.002;
+            
+            stars.rotation.z += 0.0005;
+
+            renderer.render(scene, camera);
         }
 
-        initParticles();
-        animateParticles();
+        // التعامل مع تغيير حجم النافذة
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
 
-        // Scroll Progress Bar
-        window.onscroll = function() {
-            var winScroll = document.body.scrollTop || document.documentElement.scrollTop;
-            var height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-            var scrolled = (winScroll / height) * 100;
-            document.getElementById("scroll-progress").style.width = scrolled + "%";
-        };
-
+        animate();
     </script>
 </body>
 </html>
