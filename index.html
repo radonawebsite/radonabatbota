@@ -3,159 +3,335 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Radona Space Shop | Next-Gen E-com</title>
+    <title>Radona Nexus | Digital Frontiers</title>
     <style>
         :root {
-            --neon-blue: #00f2ff;
-            --neon-purple: #bc13fe;
-            --glass: rgba(255, 255, 255, 0.05);
+            --primary-glow: #00eaff; /* Cyan */
+            --secondary-glow: #ff00ea; /* Magenta */
+            --dark-bg: #0d0f1c;
+            --glass-card: rgba(255, 255, 255, 0.08);
+            --border-glow: rgba(0, 234, 255, 0.4);
         }
 
         body {
             margin: 0;
-            background: #020205; /* Deep Space Black */
-            color: white;
-            font-family: 'Orbitron', sans-serif; /* هاد الخط كيعطي طابع فضائي */
+            background: var(--dark-bg);
+            color: #e0e0e0;
+            font-family: 'Roboto Mono', monospace; /* خط عصري تقني */
             overflow-x: hidden;
+            perspective: 1px; /* للـ Parallax Scrolling */
+            transform-style: preserve-3d;
+            height: 100vh;
         }
 
-        /* Stars Animation Background */
-        .stars-bg {
+        /* Particles/Stars Background (JS handles creation) */
+        .particle-bg {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(ellipse at bottom, #1B2735 0%, #090A0F 100%);
+            z-index: -2;
+            pointer-events: none;
+        }
+
+        /* Parallax Layer for Deep Space */
+        .parallax-layer {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-size: cover;
+            background-position: center;
+            transform-origin: 0 0;
             z-index: -1;
+        }
+        .layer-far {
+            background-image: url('https://raw.githubusercontent.com/RadonaDev/assets/main/space-nebula.webp'); /* صورة سديم */
+            transform: translateZ(-2px) scale(3);
+        }
+        .layer-mid {
+            background-image: url('https://raw.githubusercontent.com/RadonaDev/assets/main/stars-field.webp'); /* حقل نجوم */
+            transform: translateZ(-1px) scale(2);
         }
 
         header {
-            padding: 40px;
+            position: relative;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
             text-align: center;
+            background: rgba(0,0,0,0.3); /* طبقة شفافة فوق البارالاكس */
+        }
+        h1 {
+            font-size: 4em;
             text-transform: uppercase;
-            letter-spacing: 8px;
-            text-shadow: 0 0 15px var(--neon-blue);
+            letter-spacing: 10px;
+            color: #fff;
+            text-shadow: 0 0 20px var(--primary-glow), 0 0 40px var(--primary-glow);
+            margin-bottom: 20px;
+            animation: fadeIn 2s ease-out;
+        }
+        p.tagline {
+            font-size: 1.5em;
+            color: #b0c4de;
+            animation: slideIn 2.5s ease-out;
+        }
+        .cta-button {
+            background: linear-gradient(45deg, var(--primary-glow), var(--secondary-glow));
+            border: none;
+            padding: 18px 45px;
+            border-radius: 50px;
+            color: var(--dark-bg);
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            box-shadow: 0 0 25px var(--primary-glow);
+            transition: all 0.4s ease;
+            margin-top: 40px;
+        }
+        .cta-button:hover {
+            box-shadow: 0 0 40px var(--primary-glow), 0 0 60px var(--secondary-glow);
+            transform: scale(1.05);
         }
 
-        .container {
+        /* Product Section */
+        .section {
+            padding: 80px 40px;
+            position: relative;
+            z-index: 1; /* باش يكون فوق البارالاكس */
+            background: rgba(13, 15, 28, 0.8); /* خلفية شبه شفافة للسكشن */
+            border-top: 1px solid rgba(0, 234, 255, 0.2);
+        }
+        .section-title {
+            font-size: 3em;
+            text-align: center;
+            color: var(--primary-glow);
+            text-shadow: 0 0 15px var(--primary-glow);
+            margin-bottom: 60px;
+        }
+        .product-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 40px;
-            padding: 50px;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 60px;
             max-width: 1200px;
             margin: auto;
         }
-
         .product-card {
-            background: var(--glass);
-            backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            padding: 25px;
+            background: var(--glass-card);
+            backdrop-filter: blur(10px);
+            border-radius: 25px;
+            padding: 30px;
             text-align: center;
-            transition: 0.5s;
+            border: 1px solid var(--border-glow);
+            box-shadow: 0 0 15px rgba(0, 234, 255, 0.1);
+            transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94); /* Smooth Cubic Bezier */
             position: relative;
             overflow: hidden;
         }
-
         .product-card::before {
             content: '';
             position: absolute;
-            top: -50%; left: -50%;
-            width: 200%; height: 200%;
-            background: conic-gradient(transparent, transparent, transparent, var(--neon-blue));
-            animation: rotate 4s linear infinite;
+            top: -100px; left: -100px;
+            width: 200px; height: 200px;
+            background: radial-gradient(circle, var(--primary-glow) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+            pointer-events: none;
             z-index: -1;
         }
-
-        @keyframes rotate {
-            100% { transform: rotate(360deg); }
-        }
-
         .product-card:hover {
-            transform: translateY(-15px) scale(1.02);
-            border-color: var(--neon-blue);
-            box-shadow: 0 0 30px rgba(0, 242, 255, 0.3);
+            transform: translateY(-20px) scale(1.03);
+            box-shadow: 0 0 40px var(--primary-glow), 0 0 60px var(--secondary-glow);
+        }
+        .product-card:hover::before {
+            opacity: 0.3;
+            transform: scale(2);
         }
 
-        .product-img {
-            width: 100%;
-            height: 200px;
-            background: rgba(0,0,0,0.5);
-            border-radius: 15px;
+        .product-icon {
+            font-size: 4em;
+            color: var(--primary-glow);
             margin-bottom: 20px;
-            display: flex;
-            align-items: center; justify-content: center;
+            text-shadow: 0 0 10px var(--primary-glow);
         }
-
-        .price {
+        .product-title {
             font-size: 1.8em;
-            color: var(--neon-blue);
-            margin: 15px 0;
-            font-weight: bold;
+            color: #fff;
+            margin-bottom: 10px;
+            letter-spacing: 1px;
         }
-
-        .buy-btn {
-            background: transparent;
-            border: 2px solid var(--neon-purple);
-            color: white;
-            padding: 12px 30px;
-            border-radius: 50px;
+        .product-description {
+            color: #b0c4de;
+            font-size: 0.9em;
+            margin-bottom: 25px;
+        }
+        .product-price {
+            font-size: 2.2em;
+            color: var(--secondary-glow);
+            font-weight: bold;
+            text-shadow: 0 0 10px var(--secondary-glow);
+            margin-bottom: 25px;
+        }
+        .buy-now-btn {
+            background: linear-gradient(90deg, var(--secondary-glow), var(--primary-glow));
+            border: none;
+            padding: 15px 40px;
+            border-radius: 40px;
+            color: var(--dark-bg);
+            font-weight: bold;
+            font-size: 1.1em;
             cursor: pointer;
-            font-weight: bold;
-            text-transform: uppercase;
-            transition: 0.3s;
+            transition: all 0.4s ease;
+            box-shadow: 0 0 15px var(--secondary-glow);
+        }
+        .buy-now-btn:hover {
+            box-shadow: 0 0 30px var(--secondary-glow), 0 0 40px var(--primary-glow);
+            transform: scale(1.08);
         }
 
-        .buy-btn:hover {
-            background: var(--neon-purple);
-            box-shadow: 0 0 20px var(--neon-purple);
+        /* Keyframe Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-50px); }
+            to { opacity: 1; transform: translateX(0); }
         }
 
-        /* HUD Overlay effect */
-        .hud-line {
+        /* Scroll Progress Indicator (Added for futuristic feel) */
+        #scroll-progress {
             position: fixed;
-            width: 2px;
-            height: 100vh;
-            background: rgba(0, 242, 255, 0.1);
-            left: 50px; top: 0;
+            top: 0; left: 0;
+            width: 0%; height: 5px;
+            background: linear-gradient(90deg, var(--primary-glow), var(--secondary-glow));
+            z-index: 1000;
         }
     </style>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto+Mono:wght@300;400;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/js/all.min.js"></script>
 </head>
 <body>
 
-    <div class="stars-bg"></div>
-    <div class="hud-line"></div>
+    <div id="scroll-progress"></div>
+    <div class="parallax-layer layer-far"></div>
+    <div class="parallax-layer layer-mid"></div>
+    <div class="particle-bg" id="particle-canvas"></div>
 
     <header>
-        <h1>Radona Space Systems</h1>
-        <p style="letter-spacing: 2px; color: #888;">Equipping the Next Generation of Humanity</p>
+        <h1>RADONA NEXUS</h1>
+        <p class="tagline">Explore the Unseen. Acquire the Unrivaled.</p>
+        <button class="cta-button" onclick="scrollToSection('products')">ACCESS THE CORE</button>
     </header>
 
-    <div class="container">
-        <div class="product-card">
-            <div class="product-img">🚀</div>
-            <h3>Quantum Link X1</h3>
-            <p>Direct neural connection to the global AI network.</p>
-            <div class="price">2.49 ETH</div>
-            <button class="buy-btn">Acquire Link</button>
-        </div>
+    <div class="section" id="products">
+        <h2 class="section-title">Quantum Innovations</h2>
+        <div class="product-grid">
+            
+            <div class="product-card" onmousemove="handleMouseMove(event, this)">
+                <div class="product-icon"><i class="fas fa-microchip"></i></div>
+                <h3 class="product-title">Neuro-Synthesizer</h3>
+                <p class="product-description">Direct thought-to-digital interface. Enhance your cognitive output.</p>
+                <div class="product-price">3.2 ETH</div>
+                <button class="buy-now-btn">Acquire System</button>
+            </div>
 
-        <div class="product-card">
-            <div class="product-img">🌌</div>
-            <h3>Nebula Projector</h3>
-            <p>Transform your habitat into a deep space portal.</p>
-            <div class="price">0.85 ETH</div>
-            <button class="buy-btn">Acquire Link</button>
-        </div>
+            <div class="product-card" onmousemove="handleMouseMove(event, this)">
+                <div class="product-icon"><i class="fas fa-globe"></i></div>
+                <h3 class="product-title">Chronosphere Compass</h3>
+                <p class="product-description">Navigate temporal distortions with unparalleled precision.</p>
+                <div class="product-price">1.8 ETH</div>
+                <button class="buy-now-btn">Acquire System</button>
+            </div>
 
-        <div class="product-card">
-            <div class="product-img">🛡️</div>
-            <h3>Plasma Shield Pro</h3>
-            <p>Maximum protection against digital & physical threats.</p>
-            <div class="price">5.12 ETH</div>
-            <button class="buy-btn">Acquire Link</button>
+            <div class="product-card" onmousemove="handleMouseMove(event, this)">
+                <div class="product-icon"><i class="fas fa-rocket"></i></div>
+                <h3 class="product-title">Void Jumper Drive</h3>
+                <p class="product-description">Instantaneous displacement across interstellar distances.</p>
+                <div class="product-price">7.5 ETH</div>
+                <button class="buy-now-btn">Acquire System</button>
+            </div>
+            
         </div>
     </div>
 
+    <script>
+        // Smooth Scroll
+        function scrollToSection(id) {
+            document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Mouse Glow Effect on Cards
+        function handleMouseMove(e, card) {
+            const rect = card.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            card.style.setProperty('--x', `${x}px`);
+            card.style.setProperty('--y', `${y}px`);
+            card.style.setProperty('--card-glow', `radial-gradient(circle at ${x}px ${y}px, rgba(0, 234, 255, 0.3) 0%, transparent 70%)`);
+            card.style.background = `linear-gradient(rgba(13, 15, 28, 0.8), rgba(13, 15, 28, 0.8)), var(--card-glow)`;
+        }
+
+        // Particle Background (Simple JS Particles)
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        document.getElementById('particle-canvas').appendChild(canvas);
+        let particles = [];
+        const numParticles = 80;
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        function createParticle() {
+            return {
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                radius: Math.random() * 1.5 + 0.5,
+                color: `rgba(0, 234, 255, ${Math.random() * 0.7 + 0.3})`,
+                speedX: (Math.random() - 0.5) * 0.5,
+                speedY: (Math.random() - 0.5) * 0.5
+            };
+        }
+
+        function initParticles() {
+            for (let i = 0; i < numParticles; i++) {
+                particles.push(createParticle());
+            }
+        }
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (let i = 0; i < particles.length; i++) {
+                let p = particles[i];
+                p.x += p.speedX;
+                p.y += p.speedY;
+
+                if (p.x < 0 || p.x > canvas.width) p.speedX *= -1;
+                if (p.y < 0 || p.y > canvas.height) p.speedY *= -1;
+
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                ctx.fillStyle = p.color;
+                ctx.fill();
+            }
+            requestAnimationFrame(animateParticles);
+        }
+
+        initParticles();
+        animateParticles();
+
+        // Scroll Progress Bar
+        window.onscroll = function() {
+            var winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+            var height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            var scrolled = (winScroll / height) * 100;
+            document.getElementById("scroll-progress").style.width = scrolled + "%";
+        };
+
+    </script>
 </body>
 </html>
