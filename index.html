@@ -2,36 +2,28 @@
 <html lang="ar">
 <head>
     <meta charset="UTF-8">
-    <title>Hollow Knight: The Ghost Echo</title>
+    <title>Void Sentinel: Beyond Hollow</title>
     <style>
-        body { margin: 0; overflow: hidden; background: #020205; cursor: none; }
-        #game-ui {
-            position: absolute; top: 40px; left: 40px;
-            font-family: 'Cinzel', serif; color: #fff; pointer-events: none;
-        }
-        .soul-container {
-            width: 60px; height: 60px; border: 3px solid #eee;
-            border-radius: 50%; display: flex; align-items: center;
-            justify-content: center; box-shadow: 0 0 20px rgba(255,255,255,0.2);
-            background: rgba(0,0,0,0.5);
-        }
-        #soul-inner {
-            width: 80%; height: 80%; background: #fff;
-            border-radius: 50%; box-shadow: 0 0 30px #fff;
-            filter: blur(2px); transition: 0.5s;
+        body { margin: 0; overflow: hidden; background: #000; }
+        canvas { display: block; filter: saturate(1.2) contrast(1.1); }
+        #hud {
+            position: absolute; top: 30px; left: 30px;
+            font-family: 'Cinzel', serif; color: #fff;
+            text-shadow: 0 0 10px rgba(255,255,255,0.5);
         }
     </style>
 </head>
 <body>
 
-<div id="game-ui">
-    <div class="soul-container"><div id="soul-inner"></div></div>
+<div id="hud">
+    <div style="font-size: 28px; letter-spacing: 5px;">VOID SENTINEL</div>
+    <div id="dialogue" style="font-size: 14px; opacity: 0.6; margin-top: 10px;">النظام مستقر... في انتظار الأوامر.</div>
 </div>
 
-<canvas id="stage"></canvas>
+<canvas id="gameCanvas"></canvas>
 
 <script>
-const canvas = document.getElementById('stage');
+const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
@@ -40,150 +32,145 @@ let frame = 0;
 const keys = {};
 
 const knight = {
-    x: 200, y: 0,
-    vx: 0, vy: 0,
-    w: 50, h: 80,
-    dir: 1,
-    isJumping: false,
-    scale: 1,
-    cloakAngle: 0
+    x: canvas.width / 2, y: canvas.height - 200,
+    vx: 0, vy: 0, w: 60, h: 90,
+    dir: 1, isJumping: false,
+    trail: [] // نظام تتبع الحركة لعمل Blur
 };
 
-// --- رسم الشخصية (The Ghost) بدقة ---
-function drawKnight() {
+// --- رسم السيف (The Ancient Nail) بتأثير النيون ---
+function drawNail(x, y, dir) {
+    ctx.save();
+    ctx.translate(x + (25 * dir), y + 20 + Math.sin(frame*0.1)*5);
+    ctx.rotate(dir * 0.2 + (Math.sin(frame*0.05)*0.1));
+    
+    // توهج السيف
+    ctx.shadowBlur = 20;
+    ctx.shadowColor = "#0ff";
+    ctx.fillStyle = "rgba(200, 255, 255, 0.9)";
+    
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(40 * dir, -10);
+    ctx.lineTo(45 * dir, 0);
+    ctx.lineTo(40 * dir, 10);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+}
+
+// --- رسم الشخصية المتطورة (The Ghost V2) ---
+function drawGhost() {
     ctx.save();
     ctx.translate(knight.x, knight.y);
     
-    // أنيميشن التنفس والقفز
-    let breathe = Math.sin(frame * 0.05) * 2;
-    let jumpStretch = knight.vy * 0.1;
-    ctx.scale(knight.dir * (1 - Math.abs(jumpStretch)*0.1), 1 + jumpStretch*0.1);
+    // تأثير الـ Ghost Trail (بقايا الحركة)
+    knight.trail.push({x: 0, y: 0, op: 0.5});
+    if(knight.trail.length > 5) knight.trail.shift();
+    
+    knight.trail.forEach((t, i) => {
+        ctx.globalAlpha = t.op * (i/5);
+        ctx.fillStyle = "#1a1a2e";
+        ctx.fillRect(-20 + (i*2), 0, 40, 60);
+    });
 
-    // 1. العباءة (Cloak) - كتحرك مع الحركة
-    ctx.fillStyle = "#2a2a35";
+    ctx.globalAlpha = 1;
+    let breath = Math.sin(frame * 0.04) * 3;
+
+    // 1. العباءة الممزقة (Tattered Cloak)
+    ctx.fillStyle = "#16161d";
     ctx.beginPath();
-    ctx.moveTo(-25, 10);
-    // رفرفة العباءة بناءً على السرعة
-    let cloakWave = Math.sin(frame * 0.1 + knight.vx * 0.5) * 5;
-    ctx.bezierCurveTo(-30, 60 + cloakWave, 30, 60 + cloakWave, 25, 10);
+    ctx.moveTo(-30, 10);
+    for(let i=0; i<6; i++) {
+        let wave = Math.sin(frame*0.1 + i) * 10;
+        ctx.lineTo(-30 + (i*12), 70 + wave + (knight.vy * 2));
+    }
+    ctx.lineTo(30, 10);
     ctx.fill();
 
-    // 2. الجسم الداخلي (الظل)
+    // 2. الماسك مع تدرج لوني (Shaded Mask)
+    let maskGrad = ctx.createRadialGradient(0, -20, 5, 0, -20, 30);
+    maskGrad.addColorStop(0, "#ffffff");
+    maskGrad.addColorStop(1, "#a0a0b0");
+    
+    ctx.fillStyle = maskGrad;
+    ctx.shadowBlur = 15;
+    ctx.shadowColor = "rgba(255,255,255,0.3)";
+    ctx.beginPath();
+    ctx.ellipse(0, -20 + breath, 28, 32, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 3. القرون السينمائية
+    ctx.beginPath();
+    ctx.moveTo(-15, -40 + breath);
+    ctx.bezierCurveTo(-40, -80 + breath, -10, -90 + breath, -5, -45 + breath);
+    ctx.moveTo(15, -40 + breath);
+    ctx.bezierCurveTo(40, -80 + breath, 10, -90 + breath, 5, -45 + breath);
+    ctx.fill();
+
+    // 4. العيون العميقة (Glowing Void Eyes)
+    ctx.shadowBlur = 0;
     ctx.fillStyle = "#000";
     ctx.beginPath();
-    ctx.ellipse(0, 10, 15, 25, 0, 0, Math.PI * 2);
-    ctx.fill();
-
-    // 3. الماسك (The Mask)
-    ctx.fillStyle = "#f8f8f8";
-    ctx.shadowBlur = 10;
-    ctx.shadowColor = "rgba(255,255,255,0.2)";
+    ctx.ellipse(-10, -18 + breath, 7, 12, 0.1, 0, Math.PI*2); ctx.fill();
     ctx.beginPath();
-    // رأس بيضاوي مع انحناءة لتحت
-    ctx.ellipse(0, -15 + breathe, 22, 25, 0, 0, Math.PI * 2);
-    ctx.fill();
-
-    // 4. القرون (Horns)
-    ctx.beginPath();
-    // القرن الأيسر
-    ctx.moveTo(-12, -30 + breathe);
-    ctx.quadraticCurveTo(-25, -60 + breathe, -10, -45 + breathe);
-    ctx.lineTo(-5, -35 + breathe);
-    // القرن الأيمن
-    ctx.moveTo(12, -30 + breathe);
-    ctx.quadraticCurveTo(25, -60 + breathe, 10, -45 + breathe);
-    ctx.lineTo(5, -35 + breathe);
-    ctx.fill();
-
-    // 5. العينين (Void Eyes)
-    ctx.fillStyle = "#050505";
-    ctx.shadowBlur = 0;
-    ctx.beginPath();
-    ctx.ellipse(-8, -12 + breathe, 5, 9, 0.1, 0, Math.PI * 2); // عين يسرى
-    ctx.fill();
-    ctx.beginPath();
-    ctx.ellipse(8, -12 + breathe, 5, 9, -0.1, 0, Math.PI * 2); // عين يمنى
-    ctx.fill();
+    ctx.ellipse(10, -18 + breath, 7, 12, -0.1, 0, Math.PI*2); ctx.fill();
+    
+    // بؤبؤ العين الخافت
+    ctx.fillStyle = "rgba(255,255,255,0.1)";
+    ctx.beginPath(); ctx.arc(-10, -20 + breath, 2, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(10, -20 + breath, 2, 0, Math.PI*2); ctx.fill();
 
     ctx.restore();
 }
 
-// --- بيئة غامضة (Ambience) ---
-const particles = [];
-function createMote() {
-    if (Math.random() > 0.95) {
-        particles.push({
-            x: Math.random() * canvas.width,
-            y: Math.random() * canvas.height,
-            s: Math.random() * 2,
-            v: Math.random() * 0.5
-        });
+function drawBackground() {
+    // نجوم بعيدة متحركة
+    ctx.fillStyle = "#fff";
+    for(let i=0; i<50; i++) {
+        let x = (Math.sin(i) * 5000 + frame * 0.2) % canvas.width;
+        let y = (Math.cos(i) * 5000) % canvas.height;
+        ctx.globalAlpha = Math.random();
+        ctx.fillRect(x, y, 2, 2);
     }
-}
+    ctx.globalAlpha = 1;
 
-function drawEnvironment() {
-    // ضبابة خفيفة
-    let grd = ctx.createRadialGradient(knight.x, knight.y, 10, knight.x, knight.y, 400);
-    grd.addColorStop(0, "rgba(40, 50, 80, 0.15)");
-    grd.addColorStop(1, "transparent");
-    ctx.fillStyle = grd;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    // ذرات الغبار
-    ctx.fillStyle = "rgba(255,255,255,0.3)";
-    particles.forEach((p, i) => {
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.s, 0, Math.PI*2);
-        ctx.fill();
-        p.y -= p.v;
-        if (p.y < 0) particles.splice(i, 1);
-    });
+    // ضباب أرضي (Fog)
+    let fogGrad = ctx.createLinearGradient(0, canvas.height-200, 0, canvas.height);
+    fogGrad.addColorStop(0, "transparent");
+    fogGrad.addColorStop(1, "rgba(50, 60, 100, 0.4)");
+    ctx.fillStyle = fogGrad;
+    ctx.fillRect(0, canvas.height-200, canvas.width, 200);
 }
 
 function update() {
-    // جاذبية وحركة
     knight.vy += 0.8;
     knight.y += knight.vy;
     knight.x += knight.vx;
 
-    // الأرضية
     if (knight.y > canvas.height - 150) {
         knight.y = canvas.height - 150;
         knight.vy = 0;
         knight.isJumping = false;
     }
 
-    // سلاسة الحركة (Inertia)
-    if (keys['ArrowRight'] || keys['KeyD']) {
-        knight.vx = Math.min(knight.vx + 1, 6);
-        knight.dir = 1;
-    } else if (keys['ArrowLeft'] || keys['KeyA']) {
-        knight.vx = Math.max(knight.vx - 1, -6);
-        knight.dir = -1;
-    } else {
-        knight.vx *= 0.8;
-    }
+    if (keys['ArrowRight'] || keys['KeyD']) { knight.vx = 7; knight.dir = 1; }
+    else if (keys['ArrowLeft'] || keys['KeyA']) { knight.vx = -7; knight.dir = -1; }
+    else { knight.vx *= 0.8; }
 
-    createMote();
     frame++;
 }
 
-function render() {
-    ctx.fillStyle = "#020205";
+function loop() {
+    // تأثير الـ Motion Blur البسيط على الشاشة
+    ctx.fillStyle = "rgba(2, 2, 8, 0.3)";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    drawEnvironment();
-
-    // رسم الأرضية
-    ctx.fillStyle = "#050508";
-    ctx.fillRect(0, canvas.height - 150, canvas.width, 150);
-    ctx.strokeStyle = "#1a1a25";
-    ctx.lineWidth = 2;
-    ctx.strokeRect(0, canvas.height - 150, canvas.width, 2);
-
-    drawKnight();
+    drawBackground();
+    drawGhost();
+    drawNail(knight.x, knight.y, knight.dir);
     update();
-    requestAnimationFrame(render);
+    requestAnimationFrame(loop);
 }
 
 window.addEventListener('keydown', e => {
@@ -195,7 +182,7 @@ window.addEventListener('keydown', e => {
 });
 window.addEventListener('keyup', e => keys[e.code] = false);
 
-render();
+loop();
 </script>
 </body>
 </html>
