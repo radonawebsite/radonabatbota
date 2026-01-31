@@ -2,120 +2,194 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>واجهة الأحلام الخيالية</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dreamy AI Chatbot</title>
     <style>
-        /* إعدادات الخلفية المتحركة */
+        :root {
+            --primary-glow: #00d2ff;
+            --secondary-glow: #9d50bb;
+            --glass-bg: rgba(15, 15, 25, 0.7);
+        }
+
         body {
             margin: 0;
-            padding: 0;
+            height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
-            background: linear-gradient(45deg, #0f0c29, #302b63, #24243e);
-            background-size: 400% 400%;
-            animation: gradientBG 15s ease infinite;
+            background: radial-gradient(circle at center, #1a1a2e 0%, #020205 100%);
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             overflow: hidden;
         }
 
-        @keyframes gradientBG {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
+        /* تأثيرات النور المتحرك في الخلفية */
+        body::before {
+            content: "";
+            position: absolute;
+            width: 300px; height: 300px;
+            background: var(--primary-glow);
+            filter: blur(150px);
+            border-radius: 50%;
+            top: 10%; left: 10%;
+            animation: move 10s infinite alternate;
         }
 
-        /* البطاقة الزجاجية */
-        .glass-card {
+        @keyframes move { 
+            to { transform: translate(100vw, 80vh); filter: blur(200px); background: var(--secondary-glow); } 
+        }
+
+        /* حاوية الشات */
+        .chat-container {
+            width: 450px;
+            height: 80vh;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 30px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
             position: relative;
-            width: 400px;
-            padding: 40px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 25px 45px rgba(0, 0, 0, 0.2);
+            z-index: 10;
+        }
+
+        /* رأس الشات */
+        .chat-header {
+            padding: 20px;
             text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .chat-header h2 {
+            margin: 0;
+            font-size: 1.2rem;
+            color: #fff;
+            text-shadow: 0 0 10px var(--primary-glow);
+        }
+
+        /* منطقة الرسائل */
+        #chat-box {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            scrollbar-width: none;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 12px 18px;
+            border-radius: 20px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            animation: fadeIn 0.4s ease forwards;
+            position: relative;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px) scale(0.9); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .bot-msg {
+            background: rgba(255, 255, 255, 0.05);
+            color: #e0e0e0;
+            align-self: flex-start;
+            border-bottom-right-radius: 5px;
+            border: 1px solid rgba(0, 210, 255, 0.3);
+        }
+
+        .user-msg {
+            background: linear-gradient(135deg, var(--primary-glow), var(--secondary-glow));
             color: white;
-            transition: 0.5s;
-            transform: translateY(100px);
-            opacity: 0;
-            animation: slideUp 1s ease forwards;
+            align-self: flex-end;
+            border-bottom-left-radius: 5px;
+            box-shadow: 0 4px 15px rgba(0, 210, 255, 0.3);
         }
 
-        .glass-card:hover {
-            transform: translateY(-10px) scale(1.02);
-            border: 1px solid rgba(255, 255, 255, 0.5);
+        /* صندوق الإدخال */
+        .input-area {
+            padding: 20px;
+            display: flex;
+            gap: 10px;
         }
 
-        /* تأثيرات النص */
-        h1 {
-            font-size: 2.5rem;
-            margin-bottom: 20px;
-            background: linear-gradient(to right, #fff, #00d2ff);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        p {
-            line-height: 1.6;
-            font-size: 1.1rem;
-            opacity: 0.9;
-        }
-
-        /* الزر الخارق */
-        .magic-btn {
-            margin-top: 30px;
-            padding: 12px 30px;
-            border: none;
+        input {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 12px 20px;
             border-radius: 50px;
-            background: #fff;
-            color: #302b63;
-            font-weight: bold;
+            color: white;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        input:focus {
+            border-color: var(--primary-glow);
+            box-shadow: 0 0 10px rgba(0, 210, 255, 0.2);
+        }
+
+        .send-btn {
+            background: var(--primary-glow);
+            border: none;
+            width: 45px; height: 45px;
+            border-radius: 50%;
             cursor: pointer;
             transition: 0.3s;
-            position: relative;
-            overflow: hidden;
+            display: flex; align-items: center; justify-content: center;
         }
 
-        .magic-btn:hover {
-            letter-spacing: 2px;
-            box-shadow: 0 0 20px #00d2ff;
-        }
-
-        /* الأنيميشن */
-        @keyframes slideUp {
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-
-        /* الأشكال العائمة في الخلفية */
-        .circle {
-            position: absolute;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 50%;
-            z-index: -1;
-            animation: float 10s infinite alternate;
-        }
-
-        @keyframes float {
-            from { transform: translateY(0px) rotate(0deg); }
-            to { transform: translateY(-100px) rotate(360deg); }
+        .send-btn:hover {
+            transform: rotate(-15deg) scale(1.1);
+            box-shadow: 0 0 20px var(--primary-glow);
         }
     </style>
 </head>
 <body>
 
-    <div class="circle" style="width: 200px; height: 200px; top: 10%; left: 10%;"></div>
-    <div class="circle" style="width: 150px; height: 150px; bottom: 10%; right: 20%; background: rgba(0, 210, 255, 0.2);"></div>
+    <div class="chat-container">
+        <div class="chat-header">
+            <h2>✨ مساعد الأحلام الذكي</h2>
+        </div>
+        
+        <div id="chat-box">
+            <div class="message bot-msg">أهلاً بك في المستقبل.. كيف يمكنني مساعدتك اليوم؟</div>
+        </div>
 
-    <div class="glass-card">
-        <h1>واجهة الأحلام</h1>
-        <p>مرحباً بك في عالم الخيال، حيث تجتمع التكنولوجيا مع الإبداع لتشكيل تجربة بصرية لا تُنسى.</p>
-        <button class="magic-btn">استكشف السحر</button>
+        <div class="input-area">
+            <input type="text" id="user-input" placeholder="اكتب رسالتك الخيالية هنا...">
+            <button class="send-btn" onclick="sendMessage()">🚀</button>
+        </div>
     </div>
 
+    <script>
+        function sendMessage() {
+            const input = document.getElementById('user-input');
+            const chatBox = document.getElementById('chat-box');
+            
+            if (input.value.trim() === "") return;
+
+            // رسالة المستخدم
+            const userDiv = document.createElement('div');
+            userDiv.className = 'message user-msg';
+            userDiv.textContent = input.value;
+            chatBox.appendChild(userDiv);
+
+            // محاكاة رد البوت الخيالي
+            setTimeout(() => {
+                const botDiv = document.createElement('div');
+                botDiv.className = 'message bot-msg';
+                botDiv.textContent = "هذا مذهل! دعنا نستكشف هذه الفكرة معاً في عالم الأحلام.";
+                chatBox.appendChild(botDiv);
+                chatBox.scrollTop = chatBox.scrollHeight;
+            }, 800);
+
+            input.value = "";
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+    </script>
 </body>
 </html>
