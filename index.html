@@ -2,18 +2,30 @@
 <html lang="ar">
 <head>
     <meta charset="UTF-8">
-    <title>THE ENTITY | النظام</title>
+    <title>THE ENTITY | النظام والشات</title>
     <style>
-        body { background: #000; color: #ff0000; font-family: monospace; text-align: center; padding-top: 20vh; }
-        #timer { font-size: 5rem; text-shadow: 0 0 20px #ff0000; }
-        button { background: none; border: 2px solid #ff0000; color: #ff0000; padding: 15px; cursor: pointer; margin-top: 30px; }
+        body { background: #000; color: #ff0000; font-family: monospace; text-align: center; margin: 0; padding: 20px; }
+        #timer { font-size: 4rem; text-shadow: 0 0 15px #ff0000; margin-bottom: 10px; }
+        
+        /* تصميم الشات */
+        #chat-container { width: 90%; max-width: 500px; margin: 20px auto; background: #0a0a0a; border: 1px solid #333; height: 300px; display: flex; flex-direction: column; }
+        #messages { flex: 1; overflow-y: auto; padding: 10px; text-align: left; font-size: 0.9rem; color: #00ff00; }
+        #msg-input { background: #000; border: none; border-top: 1px solid #333; color: #fff; padding: 10px; outline: none; }
+        
+        button { background: none; border: 2px solid #ff0000; color: #ff0000; padding: 10px; cursor: pointer; margin-top: 10px; }
         button:hover { background: #ff0000; color: #000; }
+        .msg-item { margin-bottom: 5px; border-bottom: 1px solid #111; padding-bottom: 2px; }
     </style>
 </head>
 <body>
 
     <div id="timer">--:--:--</div>
     <button id="btn">تبرع بـ 10 ثواني</button>
+
+    <div id="chat-container">
+        <div id="messages"></div>
+        <input type="text" id="msg-input" placeholder="اكتب رسالة مجهولة..." maxlength="100">
+    </div>
 
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
@@ -27,34 +39,48 @@
 
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
+        
+        // المراجع
         const timerRef = db.ref('globalTimer');
+        const chatRef = db.ref('chat');
 
-        // تحديث الشاشة
+        // 1. نظام العداد (نفس اللي خدم ليك)
         timerRef.on('value', (snapshot) => {
             let val = snapshot.val();
-            if (val === null) {
-                document.getElementById('timer').innerText = "OFFLINE";
-            } else {
-                let h = Math.floor(val / 3600);
-                let m = Math.floor((val % 3600) / 60);
-                let s = val % 60;
-                document.getElementById('timer').innerText = 
-                    `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+            if (val === null) { document.getElementById('timer').innerText = "OFFLINE"; }
+            else {
+                let h = Math.floor(val / 3600), m = Math.floor((val % 3600) / 60), s = val % 60;
+                document.getElementById('timer').innerText = `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
             }
         });
 
-        // التبرع (زيادة الوقت للجميع)
-        document.getElementById('btn').onclick = () => {
-            timerRef.transaction(t => (t || 86400) + 10);
-        };
+        document.getElementById('btn').onclick = () => { timerRef.transaction(t => (t || 86400) + 10); };
+        setInterval(() => { timerRef.transaction(t => (t && t > 0) ? t - 1 : 0); }, 1000);
 
-        // إنقاص الوقت (العد التنازلي العالمي)
-        setInterval(() => {
-            timerRef.transaction(t => {
-                if (t && t > 0) return t - 1;
-                return 0;
-            });
-        }, 1000);
+        // 2. نظام الشات
+        const msgInput = document.getElementById('msg-input');
+        const messagesDiv = document.getElementById('messages');
+
+        // إرسال الرسالة
+        msgInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && msgInput.value.trim() !== "") {
+                chatRef.push({
+                    text: msgInput.value,
+                    timestamp: Date.now()
+                });
+                msgInput.value = "";
+            }
+        });
+
+        // استقبال الرسائل (فقط آخر 50 رسالة باش ما يثقلش السيت)
+        chatRef.limitToLast(50).on('child_added', (snapshot) => {
+            const data = snapshot.val();
+            const msgEl = document.createElement('div');
+            msgEl.className = 'msg-item';
+            msgEl.innerText = `> ${data.text}`;
+            messagesDiv.appendChild(msgEl);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight; // النزول لآخر رسالة
+        });
     </script>
 </body>
 </html>
