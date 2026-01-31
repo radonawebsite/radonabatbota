@@ -2,158 +2,149 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>الديوان الخاص | مراسلات سيادية</title>
+    <title>X-CORE | منظومة المراسلات السيادية</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Playfair+Display:wght@900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Playfair+Display:ital,wght@0,700;1,900&display=swap');
 
         :root {
             --gold: #d4af37;
-            --dark-wood: #0d0d0d;
-            --royal-red: #3d0000;
-            --paper: #e8d5b5;
+            --gold-light: #f9e29f;
+            --deep-red: #350101;
+            --wood: #0a0a0a;
+            --paper: #eaddca;
         }
 
-        body {
-            margin: 0; height: 100vh; display: flex; align-items: center; justify-content: center;
-            background: radial-gradient(circle, #1a1a1a 0%, #000 100%);
-            font-family: 'Amiri', serif; overflow: hidden;
+        body, html {
+            margin: 0; padding: 0; height: 100%;
+            background: radial-gradient(circle at center, #1a1a1a 0%, #000 100%);
+            font-family: 'Amiri', serif; overflow: hidden; color: var(--gold);
         }
 
-        /* الإطار الفخم المحفور */
-        .majestic-frame {
-            padding: 20px;
-            background: linear-gradient(135deg, #8a6d3b 0%, #f9e29f 50%, #8a6d3b 100%);
-            border-radius: 5px;
-            box-shadow: 0 0 100px rgba(0,0,0,1);
+        /* تأثير الغبار المتطاير في الإضاءة الخافتة */
+        #particles { position: fixed; width: 100%; height: 100%; z-index: 1; pointer-events: none; }
+
+        /* واجهة الدخول الملكية */
+        .royal-auth-container {
+            position: relative; z-index: 10;
+            display: flex; align-items: center; justify-content: center; height: 100vh;
+        }
+
+        .auth-card {
+            background: var(--wood);
+            padding: 60px;
+            border: 5px double var(--gold);
+            box-shadow: 0 0 100px rgba(0,0,0,1), inset 0 0 50px rgba(212,175,55,0.1);
+            width: 400px; text-align: center;
             position: relative;
-            animation: emerge 2s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
 
-        .inner-vault {
-            background: var(--dark-wood);
-            border: 1px solid var(--gold);
-            padding: 60px 40px;
-            width: 450px;
-            text-align: center;
-            box-shadow: inset 0 0 50px rgba(0,0,0,0.9);
+        .auth-card::before {
+            content: ""; position: absolute; top: -15px; left: -15px; right: -15px; bottom: -15px;
+            border: 1px solid var(--gold); opacity: 0.3; pointer-events: none;
         }
 
-        h1 {
-            font-family: 'Playfair Display', serif;
-            color: var(--gold);
-            font-size: 2.5rem;
-            margin: 0 0 40px 0;
-            letter-spacing: 3px;
-            text-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
-        }
+        h1 { font-family: 'Playfair Display', serif; font-size: 2.5rem; letter-spacing: 4px; margin-bottom: 40px; }
 
-        /* حقول الإدخال الأنيقة */
-        .field {
-            margin-bottom: 30px;
-            position: relative;
+        .input-box {
+            position: relative; margin-bottom: 30px;
         }
 
         input {
-            width: 100%;
-            background: rgba(255,255,255,0.03);
-            border: none;
-            border-bottom: 2px solid #333;
-            padding: 15px;
-            color: var(--paper);
-            font-size: 1.3rem;
-            outline: none;
-            transition: 0.5s;
-            text-align: center;
+            width: 100%; background: transparent; border: none;
+            border-bottom: 2px solid #222; padding: 10px;
+            color: var(--paper); font-size: 1.4rem; outline: none;
+            transition: 0.5s; text-align: center;
         }
 
-        input:focus {
-            border-bottom-color: var(--gold);
-            background: rgba(212, 175, 55, 0.05);
+        input:focus { border-bottom-color: var(--gold); background: rgba(212,175,55,0.05); }
+
+        .btn-royal {
+            background: var(--gold); color: #000; border: none;
+            padding: 15px 50px; font-family: 'Playfair Display', serif;
+            font-weight: 900; cursor: pointer; font-size: 1.2rem;
+            transition: 0.4s; box-shadow: 0 0 20px rgba(212,175,55,0.3);
         }
 
-        .btn-gold {
-            background: var(--gold);
-            color: black;
-            border: none;
-            padding: 15px 40px;
-            font-family: 'Playfair Display', serif;
-            font-weight: 900;
-            font-size: 1.2rem;
-            cursor: pointer;
-            transition: 0.4s;
-            letter-spacing: 2px;
-            box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
+        .btn-royal:hover { transform: scale(1.05); box-shadow: 0 0 50px var(--gold); }
+
+        /* واجهة الشات المطورة */
+        #main-app {
+            display: none; height: 100vh; background: var(--wood);
+            grid-template-columns: 350px 1fr;
         }
 
-        .btn-gold:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 40px var(--gold);
+        .side-panel {
+            background: #080808; border-left: 2px solid var(--gold);
+            padding: 30px; box-shadow: inset -10px 0 30px rgba(0,0,0,0.5);
         }
 
-        /* واجهة الشات الخاص (مخفية) */
-        #chat-screen {
-            display: none;
-            width: 100vw; height: 100vh;
-            background: var(--paper);
-            color: #2b0202;
+        .user-link {
+            padding: 20px; border: 1px solid rgba(212,175,55,0.1);
+            margin-bottom: 15px; cursor: pointer; transition: 0.3s;
+            position: relative;
         }
 
-        .users-list {
-            width: 300px; border-left: 2px solid var(--gold);
-            background: #d9c5a3; padding: 20px;
+        .user-link:hover { background: rgba(212,175,55,0.05); border-color: var(--gold); }
+
+        .user-link.unread::after {
+            content: ""; position: absolute; left: 10px; top: 50%;
+            width: 8px; height: 8px; background: #ff0000; border-radius: 50%;
+            box-shadow: 0 0 10px #ff0000;
         }
 
-        .user-card {
-            padding: 15px; border-bottom: 1px solid rgba(0,0,0,0.1);
-            cursor: pointer; transition: 0.3s;
+        .chat-window { display: flex; flex-direction: column; background: url('https://www.transparenttextures.com/patterns/dark-leather.png'); }
+
+        .chat-header { padding: 25px; border-bottom: 1px solid var(--gold); background: rgba(0,0,0,0.4); }
+
+        .messages-area { flex: 1; padding: 40px; overflow-y: auto; display: flex; flex-direction: column; gap: 20px; }
+
+        .bubble {
+            max-width: 60%; padding: 15px 25px; border-radius: 2px;
+            font-size: 1.1rem; line-height: 1.6; position: relative;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
         }
 
-        .user-card:hover { background: var(--paper); color: var(--gold); }
+        .bubble.me { align-self: flex-start; background: var(--gold); color: #000; font-weight: bold; border-left: 5px solid #000; }
+        .bubble.other { align-self: flex-end; background: var(--deep-red); color: var(--gold-light); border-right: 5px solid var(--gold); }
 
-        @keyframes emerge {
-            from { opacity: 0; transform: scale(0.9) translateY(50px); }
-            to { opacity: 1; transform: scale(1) translateY(0); }
-        }
+        .input-area { padding: 30px; display: flex; gap: 20px; background: #000; border-top: 1px solid var(--gold); }
     </style>
 </head>
 <body>
 
-    <div class="majestic-frame" id="loginFrame">
-        <div class="inner-vault">
-            <h1>خَتْمُ الوُلُوج</h1>
-            
-            <div class="field">
-                <input type="text" id="username" placeholder="المُعرّف الملكي (أقصى 6)" maxlength="6">
-            </div>
+    <div id="particles"></div>
 
-            <div class="field">
-                <input type="password" id="password" placeholder="كلمة السر (8 رموز)" maxlength="8">
+    <div class="royal-auth-container" id="login-section">
+        <div class="auth-card">
+            <h1>خَتْمُ السِّيَادَة</h1>
+            <div class="input-box">
+                <input type="text" id="username" placeholder="المُعرّف الملكي" maxlength="6">
             </div>
-
-            <button class="btn-gold" onclick="initiateSystem()">تـصـديـق الـهُـويّـة</button>
+            <div class="input-box">
+                <input type="password" id="password" placeholder="مِفتاح التشفير" maxlength="8">
+            </div>
+            <button class="btn-royal" onclick="login()">تَصديق الوثيقة</button>
         </div>
     </div>
 
-    <div id="chat-screen">
-        <div style="display: flex; height: 100%;">
-            <div class="users-list">
-                <h3 style="border-bottom: 2px solid var(--gold); padding-bottom: 10px;">المتصلون الآن</h3>
-                <div id="online-users">
-                    </div>
+    <div id="main-app">
+        <div class="side-panel">
+            <h2 style="border-bottom: 2px solid var(--gold); padding-bottom: 10px;">المجالس المفتوحة</h2>
+            <div id="users-list"></div>
+        </div>
+        <div class="chat-window">
+            <div class="chat-header">
+                <span id="active-user-title">اختر مراسلاً...</span>
             </div>
-
-            <div style="flex: 1; display: flex; flex-direction: column;">
-                <header style="padding: 20px; background: var(--gold); color: black; font-weight: bold;">
-                    مراسلة خاصة: <span id="chat-with-name">اختر شخصاً للبدء</span>
-                </header>
-                <div id="private-msgs" style="flex: 1; padding: 30px; overflow-y: auto;"></div>
-                <div style="padding: 20px; background: #d9c5a3; display: flex; gap: 10px;">
-                    <input type="text" id="msg-input" style="background: white; color: black; border-radius: 0; text-align: right;" placeholder="اكتب رسالتك السرية...">
-                    <button class="btn-gold" style="padding: 5px 20px;" onclick="sendPrivate()">إرسال</button>
-                </div>
+            <div class="messages-area" id="chat-flow"></div>
+            <div class="input-area">
+                <input type="text" id="msg-input" placeholder="اكتب مراسلتك هنا..." style="flex:1; text-align: right;">
+                <button class="btn-royal" onclick="send()">إرسال</button>
             </div>
         </div>
     </div>
+
+    <audio id="notif-sound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3"></audio>
 
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
@@ -168,76 +159,94 @@
         const db = firebase.database();
         
         let currentUser = localStorage.getItem('chat_user');
-        let activeChatTarget = null;
+        let currentChatTarget = null;
 
-        function initiateSystem() {
+        function login() {
             const u = document.getElementById('username').value.trim();
             const p = document.getElementById('password').value.trim();
             if(u.length >=3 && u.length <=6 && p.length === 8) {
                 currentUser = u;
                 localStorage.setItem('chat_user', u);
-                // تسجيل المستخدم كـ "متصل" في الـ Database
-                db.ref('presence/' + u).set(true);
+                db.ref('presence/' + u).set({online: true, lastSeen: Date.now()});
                 db.ref('presence/' + u).onDisconnect().remove();
-                
-                showPrivateChat();
-            } else {
-                alert("المعلومات غير مطابقة للمواصفات الملكية!");
+                startApp();
             }
         }
 
-        function showPrivateChat() {
-            document.getElementById('loginFrame').style.display = 'none';
-            document.getElementById('chat-screen').style.display = 'block';
-            loadUsers();
+        function startApp() {
+            document.getElementById('login-section').style.display = 'none';
+            document.getElementById('main-app').style.display = 'grid';
+            listenForUsers();
+            listenForGlobalNotifications();
         }
 
-        function loadUsers() {
+        function listenForUsers() {
             db.ref('presence').on('value', (snap) => {
-                const usersDiv = document.getElementById('online-users');
-                usersDiv.innerHTML = '';
-                snap.forEach((child) => {
-                    if(child.key !== currentUser) {
+                const list = document.getElementById('users-list');
+                list.innerHTML = '';
+                snap.forEach(user => {
+                    if(user.key !== currentUser) {
                         const div = document.createElement('div');
-                        div.className = 'user-card';
-                        div.innerText = "Sovereign: " + child.key;
-                        div.onclick = () => startChat(child.key);
-                        usersDiv.appendChild(div);
+                        div.className = 'user-link';
+                        div.id = 'user-' + user.key;
+                        div.innerHTML = `السيد: ${user.key}`;
+                        div.onclick = () => openChat(user.key);
+                        list.appendChild(div);
                     }
                 });
             });
         }
 
-        function startChat(target) {
-            activeChatTarget = target;
-            document.getElementById('chat-with-name').innerText = target;
-            document.getElementById('private-msgs').innerHTML = '';
-            loadPrivateMessages();
-        }
-
-        function loadPrivateMessages() {
-            // كود جلب الرسائل اللي بيني وبين هاد الشخص فقط
-            const chatID = [currentUser, activeChatTarget].sort().join('_');
-            db.ref('private_chats/' + chatID).on('child_added', (snap) => {
-                const data = snap.val();
-                const div = document.createElement('div');
-                div.style.marginBottom = "15px";
-                div.style.textAlign = data.from === currentUser ? 'left' : 'right';
-                div.innerHTML = `<span style="background: ${data.from === currentUser ? '#d4af37' : '#eee'}; padding: 10px; border-radius: 10px;">${data.text}</span>`;
-                document.getElementById('private-msgs').appendChild(div);
+        function openChat(target) {
+            currentChatTarget = target;
+            document.getElementById('active-user-title').innerText = "مراسلة خاصة مع: " + target;
+            document.getElementById('chat-flow').innerHTML = '';
+            document.getElementById('user-' + target).classList.remove('unread');
+            
+            const chatID = [currentUser, target].sort().join('_');
+            db.ref('messages/' + chatID).off(); // تنظيف المستمعين القدامى
+            db.ref('messages/' + chatID).on('child_added', (snap) => {
+                renderMsg(snap.val());
             });
         }
 
-        function sendPrivate() {
-            if(!activeChatTarget) return;
-            const text = document.getElementById('msg-input').value;
-            const chatID = [currentUser, activeChatTarget].sort().join('_');
-            db.ref('private_chats/' + chatID).push({
+        function renderMsg(data) {
+            const flow = document.getElementById('chat-flow');
+            const div = document.createElement('div');
+            div.className = `bubble ${data.from === currentUser ? 'me' : 'other'}`;
+            div.innerText = data.text;
+            flow.appendChild(div);
+            flow.scrollTop = flow.scrollHeight;
+        }
+
+        function send() {
+            if(!currentChatTarget) return;
+            const input = document.getElementById('msg-input');
+            const chatID = [currentUser, currentChatTarget].sort().join('_');
+            db.ref('messages/' + chatID).push({
                 from: currentUser,
-                text: text,
+                text: input.value,
+                timestamp: Date.now()
+            });
+            // إرسال إشعار للطرف الآخر
+            db.ref('notifications/' + currentChatTarget).set({
+                from: currentUser,
                 time: Date.now()
             });
-            document.getElementById('msg-input').value = '';
+            input.value = '';
+        }
+
+        function listenForGlobalNotifications() {
+            db.ref('notifications/' + currentUser).on('value', (snap) => {
+                if(snap.val()) {
+                    const data = snap.val();
+                    if(data.from !== currentChatTarget) {
+                        document.getElementById('notif-sound').play();
+                        const userEl = document.getElementById('user-' + data.from);
+                        if(userEl) userEl.classList.add('unread');
+                    }
+                }
+            });
         }
     </script>
 </body>
