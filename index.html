@@ -1,166 +1,126 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Roblox Web Engine - Pro Edition</title>
+    <title>Radona AI | النسخة الخفيفة</title>
     <style>
-        body { margin: 0; overflow: hidden; background-color: #000; font-family: 'Segoe UI', sans-serif; }
-        #overlay { position: absolute; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; background: rgba(0,0,0,0.5); color: white; cursor: pointer; z-index: 10; }
-        #ui-bar { position: absolute; top: 10px; right: 10px; display: flex; gap: 10px; }
-        .btn { background: rgba(255,255,255,0.2); border: 1px solid white; color: white; padding: 5px 15px; border-radius: 4px; font-size: 12px; }
+        /* CSS - التصميم */
+        body {
+            background: #0b0e14;
+            color: #e6edf3;
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        header {
+            background: #161b22;
+            padding: 15px;
+            text-align: center;
+            border-bottom: 2px solid #7d5fff;
+            font-size: 24px;
+            font-weight: bold;
+            color: #7d5fff;
+        }
+
+        #chat-box {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .bubble {
+            max-width: 70%;
+            padding: 12px;
+            border-radius: 15px;
+            line-height: 1.4;
+        }
+
+        .user {
+            align-self: flex-start;
+            background: #7d5fff;
+            color: white;
+            border-bottom-right-radius: 2px;
+        }
+
+        .ai {
+            align-self: flex-end;
+            background: #21262d;
+            border: 1px solid #30363d;
+            border-bottom-left-radius: 2px;
+        }
+
+        .input-area {
+            background: #161b22;
+            padding: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        input {
+            flex: 1;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #30363d;
+            background: #0d1117;
+            color: white;
+            outline: none;
+        }
+
+        button {
+            background: #7d5fff;
+            color: white;
+            border: none;
+            padding: 0 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        button:hover { background: #6c47ff; }
     </style>
 </head>
 <body>
 
-<div id="overlay"><h1>Click to Play Roblox</h1></div>
-<div id="ui-bar"><div class="btn">v1.2.0</div><div class="btn">60 FPS</div></div>
+<header>RADONA BATBOTA AI</header>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<div id="chat-box">
+    <div class="bubble ai">أهلاً! أنا رادونا، كيفاش نقدر نعاونك؟</div>
+</div>
+
+<div class="input-area">
+    <input type="text" id="msg" placeholder="اكتب سؤالك هنا...">
+    <button onclick="send()">إرسال</button>
+</div>
 
 <script>
-    // --- إعدادات المحرك (Engine Setup) ---
-    const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0xaaccff);
-    scene.fog = new THREE.Fog(0xaaccff, 1, 300);
+    // JS - الحركة
+    function send() {
+        const msgInput = document.getElementById('msg');
+        const chatBox = document.getElementById('chat-box');
+        
+        if (msgInput.value.trim() === "") return;
 
-    const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 1000);
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-    document.body.appendChild(renderer.domElement);
+        // ميساج المستخدم
+        chatBox.innerHTML += `<div class="bubble user">${msgInput.value}</div>`;
+        
+        // جواب تجريبي (حتى نربطوه بالدماغ)
+        const userText = msgInput.value;
+        msgInput.value = "";
+        
+        setTimeout(() => {
+            chatBox.innerHTML += `<div class="bubble ai">سمعتك كتقول: "${userText}". هاد الساعة أنا واجهة فقط، قريباً غنولي نجاوبك بصح!</div>`;
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }, 500);
 
-    // --- الإضاءة (Roblox Studio Lighting) ---
-    const ambient = new THREE.AmbientLight(0xffffff, 0.6);
-    scene.add(ambient);
-
-    const sun = new THREE.DirectionalLight(0xffffff, 1.0);
-    sun.position.set(100, 200, 100);
-    sun.castShadow = true;
-    sun.shadow.camera.left = -50;
-    sun.shadow.camera.right = 50;
-    sun.shadow.camera.top = 50;
-    sun.shadow.camera.bottom = -50;
-    scene.add(sun);
-
-    // --- الأرضية (The Classic Baseplate) ---
-    const baseplateGeo = new THREE.BoxGeometry(200, 1, 200);
-    const baseplateMat = new THREE.MeshStandardMaterial({ color: 0x666666 });
-    const baseplate = new THREE.Mesh(baseplateGeo, baseplateMat);
-    baseplate.position.y = -0.5;
-    baseplate.receiveShadow = true;
-    scene.add(baseplate);
-
-    const grid = new THREE.GridHelper(200, 40, 0x888888, 0x555555);
-    scene.add(grid);
-
-    // --- الشخصية (Standard R6 Character) ---
-    const char = new THREE.Group();
-    const bodyMat = new THREE.MeshStandardMaterial({ color: 0x3d85c6 });
-    const limbMat = new THREE.MeshStandardMaterial({ color: 0x3d85c6 });
-    
-    const torso = new THREE.Mesh(new THREE.BoxGeometry(1, 1.2, 0.5), bodyMat);
-    torso.position.y = 1.6;
-    torso.castShadow = true;
-    char.add(torso);
-
-    const head = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.5, 0.5), new THREE.MeshStandardMaterial({color: 0xffdbac}));
-    head.position.y = 2.5;
-    char.add(head);
-
-    const lLeg = new THREE.Mesh(new THREE.BoxGeometry(0.45, 1, 0.45), limbMat);
-    lLeg.position.set(-0.25, 0.5, 0);
-    char.add(lLeg);
-
-    const rLeg = new THREE.Mesh(new THREE.BoxGeometry(0.45, 1, 0.45), limbMat);
-    rLeg.position.set(0.25, 0.5, 0);
-    char.add(rLeg);
-
-    scene.add(char);
-
-    // --- نظام التحكم والفيزياء (The Real Controller) ---
-    let velocity = new THREE.Vector3();
-    let moveForward = false, moveBackward = false, moveLeft = false, moveRight = false;
-    let yaw = 0, pitch = 0;
-    let isJumping = false;
-
-    const overlay = document.getElementById('overlay');
-    overlay.addEventListener('click', () => {
-        renderer.domElement.requestPointerLock();
-        overlay.style.display = 'none';
-    });
-
-    document.addEventListener('mousemove', (e) => {
-        if (document.pointerLockElement) {
-            yaw -= e.movementX * 0.003;
-            pitch -= e.movementY * 0.003;
-            pitch = Math.max(-Math.PI / 3, Math.min(Math.PI / 3, pitch));
-        }
-    });
-
-    const onKey = (val) => (e) => {
-        if (e.code === 'KeyW') moveForward = val;
-        if (e.code === 'KeyS') moveBackward = val;
-        if (e.code === 'KeyA') moveLeft = val;
-        if (e.code === 'KeyD') moveRight = val;
-        if (e.code === 'Space' && !isJumping && val) { velocity.y = 0.25; isJumping = true; }
-    };
-
-    document.addEventListener('keydown', onKey(true));
-    document.addEventListener('keyup', onKey(false));
-
-    // --- محرك اللعبة (Game Loop) ---
-    const clock = new THREE.Clock();
-
-    function animate() {
-        requestAnimationFrame(animate);
-        const delta = clock.getDelta();
-
-        // فيزياء الحركة (Damping)
-        const speed = 40.0;
-        const friction = 10.0;
-        velocity.x -= velocity.x * friction * delta;
-        velocity.z -= velocity.z * friction * delta;
-        velocity.y -= 0.7 * delta; // Gravity
-
-        let moveVec = new THREE.Vector3();
-        if (moveForward) moveVec.z -= 1;
-        if (moveBackward) moveVec.z += 1;
-        if (moveLeft) moveVec.x -= 1;
-        if (moveRight) moveVec.x += 1;
-        moveVec.normalize();
-
-        if (moveForward || moveBackward || moveLeft || moveRight) {
-            const rotMove = moveVec.applyQuaternion(char.quaternion);
-            velocity.x += rotMove.x * speed * delta;
-            velocity.z += rotMove.z * speed * delta;
-        }
-
-        char.position.x += velocity.x;
-        char.position.z += velocity.z;
-        char.position.y += velocity.y;
-        char.rotation.y = yaw;
-
-        if (char.position.y < 0) {
-            char.position.y = 0;
-            velocity.y = 0;
-            isJumping = false;
-        }
-
-        // تحكم الكاميرا (Orbital Follow)
-        const camDist = 12;
-        camera.position.set(
-            char.position.x + Math.sin(yaw) * Math.cos(pitch) * camDist,
-            char.position.y + Math.sin(pitch) * camDist + 4,
-            char.position.z + Math.cos(yaw) * Math.cos(pitch) * camDist
-        );
-        camera.lookAt(char.position.x, char.position.y + 1.5, char.position.z);
-
-        renderer.render(scene, camera);
+        chatBox.scrollTop = chatBox.scrollHeight;
     }
-
-    animate();
 </script>
+
 </body>
 </html>
