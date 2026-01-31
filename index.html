@@ -2,219 +2,132 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>Neural Ether | Next-Gen AI</title>
+    <title>Neural Ether | Connected AI</title>
     <style>
         :root {
             --bg-dark: #050508;
             --accent: #00f2ff;
-            --accent-purple: #7000ff;
-            --glass: rgba(255, 255, 255, 0.03);
+            --glass: rgba(255, 255, 255, 0.05);
             --border: rgba(255, 255, 255, 0.1);
         }
 
-        body, html {
-            margin: 0; padding: 0; height: 100%;
-            background: var(--bg-dark);
-            color: #e0e0e0;
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
-            overflow: hidden;
+        body {
+            margin: 0; background: var(--bg-dark); color: white;
+            font-family: 'Segoe UI', sans-serif; height: 100vh; display: flex;
         }
 
-        /* خلفية الشبكة المتحركة */
-        #canvas-bg {
-            position: fixed; top: 0; left: 0; z-index: -1;
-        }
-
-        .main-wrapper {
-            display: flex; height: 100vh;
-            backdrop-filter: blur(50px);
-        }
-
-        /* الشريط الجانبي - أكثر أناقة من ChatGPT */
-        .sidebar {
-            width: 280px;
-            background: rgba(0, 0, 0, 0.4);
-            border-left: 1px solid var(--border);
-            padding: 20px;
-            display: flex; flex-direction: column;
-        }
-
-        .new-chat-btn {
-            border: 1px solid var(--accent);
-            background: transparent; color: white;
-            padding: 12px; border-radius: 12px;
-            cursor: pointer; transition: 0.3s;
-            box-shadow: 0 0 15px rgba(0, 242, 255, 0.1);
-        }
-
-        .new-chat-btn:hover { background: rgba(0, 242, 255, 0.1); transform: scale(1.02); }
-
-        /* منطقة المحادثة */
-        .chat-view {
+        /* تصميم الشاشة */
+        .chat-container {
             flex: 1; display: flex; flex-direction: column;
-            position: relative;
+            position: relative; overflow: hidden;
         }
 
         #chat-stream {
-            flex: 1; overflow-y: auto;
-            padding: 40px 15% 150px 15%;
+            flex: 1; overflow-y: auto; padding: 50px 15%;
             scroll-behavior: smooth;
         }
 
-        /* رسالة البوت المتطورة */
-        .message {
-            margin-bottom: 30px;
-            animation: messageSlide 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+        .message { margin-bottom: 25px; animation: fadeInUp 0.5s ease; }
+        .user-msg { color: var(--accent); font-weight: bold; font-size: 1.2rem; }
+        .bot-msg { color: #ccc; line-height: 1.7; background: var(--glass); padding: 20px; border-radius: 15px; border-left: 3px solid var(--accent); }
+
+        /* منطقة الإدخال */
+        .input-area {
+            padding: 30px 15%; background: linear-gradient(transparent, var(--bg-dark));
         }
 
-        @keyframes messageSlide {
-            from { opacity: 0; transform: translateX(20px); }
-            to { opacity: 1; transform: translateX(0); }
-        }
-
-        .bot-response {
-            font-size: 1.1rem; line-height: 1.8;
-            background: linear-gradient(90deg, #fff, #a5a5a5);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .user-query {
-            color: var(--accent); font-weight: 600;
-            margin-bottom: 10px; font-size: 1.4rem;
-        }
-
-        /* صندوق الإدخال العائم */
-        .input-container {
-            position: absolute; bottom: 30px; left: 50%;
-            transform: translateX(-50%);
-            width: 60%;
-            background: var(--glass);
-            border: 1px solid var(--border);
-            border-radius: 24px;
-            padding: 15px 25px;
-            display: flex; align-items: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        .input-wrapper {
+            display: flex; background: var(--glass); border: 1px solid var(--border);
+            padding: 10px 20px; border-radius: 30px; backdrop-filter: blur(10px);
         }
 
         input {
-            flex: 1; background: transparent; border: none;
-            color: white; font-size: 1rem; outline: none;
+            flex: 1; background: transparent; border: none; color: white;
+            font-size: 1rem; outline: none; padding: 10px;
         }
 
-        /* مؤشر التفكير (Thinking Orb) */
-        .orb {
-            width: 20px; height: 20px;
-            background: var(--accent);
-            border-radius: 50%;
-            filter: blur(5px);
-            animation: pulse 1.5s infinite;
-            display: none;
+        .send-btn {
+            background: var(--accent); border: none; border-radius: 50%;
+            width: 40px; height: 40px; cursor: pointer; transition: 0.3s;
         }
 
-        @keyframes pulse {
-            0% { transform: scale(1); opacity: 0.5; }
-            50% { transform: scale(1.5); opacity: 1; box-shadow: 0 0 20px var(--accent); }
-            100% { transform: scale(1); opacity: 0.5; }
-        }
+        .send-btn:hover { transform: scale(1.1); box-shadow: 0 0 15px var(--accent); }
 
+        /* لودينج "التفكير" */
+        .thinking { display: none; color: var(--accent); font-style: italic; margin-bottom: 10px; }
+
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
 
-<canvas id="canvas-bg"></canvas>
-
-<div class="main-wrapper">
-    <div class="sidebar">
-        <button class="new-chat-btn">+ جلسة ذكاء جديدة</button>
+<div class="chat-container">
+    <div id="chat-stream">
+        <div class="message bot-msg">أنا الآن متصل بعقلي السحابي.. اسألني أي شيء وسأجيبك بذكاء خارق.</div>
     </div>
 
-    <div class="chat-view">
-        <div id="chat-stream">
-            <div class="message">
-                <div class="bot-response">أهلاً بك.. أنا المحرك العصبي المتطور. كيف يمكننا إعادة تعريف الواقع اليوم؟</div>
-            </div>
-        </div>
-
-        <div class="input-container">
-            <input type="text" id="userInput" placeholder="اسأل عن أي شيء، العقل الرقمي جاهز...">
-            <div class="orb" id="thinkingOrb"></div>
+    <div class="input-area">
+        <div id="status" class="thinking">جاري استدعاء المعرفة...</div>
+        <div class="input-wrapper">
+            <input type="text" id="userInput" placeholder="اكتب سؤالك هنا...">
+            <button class="send-btn" onclick="askAI()">⚡</button>
         </div>
     </div>
 </div>
 
 <script>
-    // تأثيرات الخلفية الجزيئية
-    const canvas = document.getElementById('canvas-bg');
-    const ctx = canvas.getContext('2d');
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    const API_KEY = "AIzaSyCfkcBg0PrlXlpXxVvfHRYFx-8jh8aOKkU"; // استبدله بمفتاحك الجديد
 
-    let particles = [];
-    class Particle {
-        constructor() {
-            this.x = Math.random() * canvas.width;
-            this.y = Math.random() * canvas.height;
-            this.size = Math.random() * 2;
-            this.speedX = Math.random() * 0.5 - 0.25;
-            this.speedY = Math.random() * 0.5 - 0.25;
-        }
-        update() {
-            this.x += this.speedX;
-            this.y += this.speedY;
-        }
-        draw() {
-            ctx.fillStyle = 'rgba(0, 242, 255, 0.2)';
-            ctx.beginPath();
-            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-            ctx.fill();
+    async function askAI() {
+        const inputField = document.getElementById('userInput');
+        const stream = document.getElementById('chat-stream');
+        const status = document.getElementById('status');
+        const prompt = inputField.value;
+
+        if (!prompt) return;
+
+        // إضافة سؤال المستخدم للواجهة
+        stream.innerHTML += `<div class="message user-msg">● ${prompt}</div>`;
+        inputField.value = "";
+        status.style.display = "block";
+        stream.scrollTop = stream.scrollHeight;
+
+        try {
+            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    contents: [{ parts: [{ text: prompt }] }]
+                })
+            });
+
+            const data = await response.json();
+            const aiText = data.candidates[0].content.parts[0].text;
+
+            // إضافة رد البوت
+            status.style.display = "none";
+            const botDiv = document.createElement('div');
+            botDiv.className = 'message bot-msg';
+            stream.appendChild(botDiv);
+            
+            // تأثير الكتابة المتدرجة
+            let i = 0;
+            const interval = setInterval(() => {
+                botDiv.textContent += aiText[i];
+                i++;
+                if (i >= aiText.length) clearInterval(interval);
+                stream.scrollTop = stream.scrollHeight;
+            }, 10);
+
+        } catch (error) {
+            status.textContent = "حدث خطأ في الاتصال بالعقل الرقمي.";
+            console.error(error);
         }
     }
 
-    function init() {
-        for (let i = 0; i < 100; i++) particles.push(new Particle());
-    }
-
-    function animate() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        particles.forEach(p => { p.update(); p.draw(); });
-        requestAnimationFrame(animate);
-    }
-    init(); animate();
-
-    // منطق الإرسال المتطور
-    const input = document.getElementById('userInput');
-    const stream = document.getElementById('chat-stream');
-    const orb = document.getElementById('thinkingOrb');
-
-    input.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter' && input.value) {
-            const val = input.value;
-            input.value = '';
-            
-            // إضافة سؤال المستخدم
-            stream.innerHTML += `<div class="message"><div class="user-query">${val}</div></div>`;
-            
-            // تشغيل مؤشر التفكير
-            orb.style.display = 'block';
-            
-            setTimeout(() => {
-                orb.style.display = 'none';
-                const botMsg = document.createElement('div');
-                botMsg.className = 'message bot-response';
-                stream.appendChild(botMsg);
-                
-                // تأثير الكتابة الحية (Streaming)
-                let text = "تحليل البيانات المتقدم يشير إلى أن طلبك يفتح آفاقاً جديدة.. جاري المعالجة عبر الطبقات العصبية...";
-                let i = 0;
-                let interval = setInterval(() => {
-                    botMsg.textContent += text[i];
-                    i++;
-                    if (i >= text.length) clearInterval(interval);
-                    stream.scrollTop = stream.scrollHeight;
-                }, 30);
-            }, 1500);
-        }
+    // دعم زر Enter
+    document.getElementById('userInput').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') askAI();
     });
 </script>
 
