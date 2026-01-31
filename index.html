@@ -1,77 +1,27 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <title>Dream Chat AI</title>
-    <style>
-        body { margin: 0; background: #050508; color: white; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
-        .chat-card { width: 90%; max-width: 600px; height: 80vh; background: rgba(255,255,255,0.05); backdrop-filter: blur(20px); border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); display: flex; flex-direction: column; box-shadow: 0 0 30px rgba(0,242,255,0.1); }
-        #chat-box { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
-        .msg { padding: 12px 18px; border-radius: 15px; max-width: 80%; line-height: 1.5; font-size: 0.95rem; }
-        .user { background: #00f2ff; color: black; align-self: flex-end; font-weight: bold; }
-        .bot { background: rgba(255,255,255,0.1); color: #ddd; align-self: flex-start; border: 1px solid rgba(0,242,255,0.3); }
-        .input-area { padding: 20px; display: flex; gap: 10px; border-top: 1px solid rgba(255,255,255,0.1); }
-        input { flex: 1; background: transparent; border: 1px solid #444; border-radius: 30px; padding: 12px 20px; color: white; outline: none; }
-        button { background: #00f2ff; border: none; padding: 10px 25px; border-radius: 30px; cursor: pointer; font-weight: bold; transition: 0.3s; }
-        button:hover { box-shadow: 0 0 15px #00f2ff; }
-        .loading { display: none; color: #00f2ff; font-size: 0.8rem; margin-bottom: 5px; text-align: center; }
-    </style>
-</head>
-<body>
+async function askAI() {
+    const KEY = "AIzaSyA47ZLlv1ZaHShZnaA0-bxH5Jcp6RK4blM"; 
+    const input = document.getElementById('userInput').value;
+    
+    // تأكد أن الرابط هو v1beta وليس v1
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${KEY}`;
 
-<div class="chat-card">
-    <div id="chat-box">
-        <div class="msg bot">مرحباً! أنا جاهز للرد على استفساراتك الآن.</div>
-    </div>
-    <div class="loading" id="loader">جاري التفكير...</div>
-    <div class="input-area">
-        <input type="text" id="userInput" placeholder="اسألني أي شيء...">
-        <button onclick="ask()">إرسال</button>
-    </div>
-</div>
+    const response = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            contents: [{ parts: [{ text: input }] }]
+        })
+    });
 
-<script>
-    const KEY = "AIzaSyA47ZLlv1ZaHShZnaA0-bxH5Jcp6RK4blM";
-
-    async function ask() {
-        const input = document.getElementById('userInput');
-        const box = document.getElementById('chat-box');
-        const loader = document.getElementById('loader');
-        const prompt = input.value.trim();
-
-        if (!prompt) return;
-
-        // عرض رسالة المستخدم
-        box.innerHTML += `<div class="msg user">${prompt}</div>`;
-        input.value = "";
-        loader.style.display = "block";
-        box.scrollTop = box.scrollHeight;
-
-        try {
-            const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${KEY}`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-            });
-
-            const data = await res.json();
-            loader.style.display = "none";
-
-            if (data.candidates && data.candidates[0].content.parts[0].text) {
-                const text = data.candidates[0].content.parts[0].text;
-                box.innerHTML += `<div class="msg bot">${text}</div>`;
-            } else {
-                box.innerHTML += `<div class="msg bot" style="color:red">وقع مشكل في الـ API. تأكد من صلاحية المفتاح.</div>`;
-            }
-        } catch (e) {
-            loader.style.display = "none";
-            box.innerHTML += `<div class="msg bot" style="color:red">خطأ في الاتصال.</div>`;
-        }
-        box.scrollTop = box.scrollHeight;
+    const data = await response.json();
+    
+    if (data.error) {
+        console.error("Error from Google:", data.error.message);
+        alert("المشكل من المفتاح: " + data.error.message);
+        return;
     }
-
-    document.getElementById('userInput').addEventListener('keypress', (e) => { if (e.key === 'Enter') ask(); });
-</script>
-
-</body>
-</html>
+    
+    // عرض النتيجة
+    const aiText = data.candidates[0].content.parts[0].text;
+    document.getElementById('chat-box').innerHTML += `<div class="msg bot">${aiText}</div>`;
+}
