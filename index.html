@@ -2,184 +2,120 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Radona AI | Premium</title>
+    <title>واجهة الأحلام الخيالية</title>
     <style>
-        :root {
-            --bg: #050505;
-            --sidebar: #121212;
-            --accent: #bb86fc;
-            --text: #e0e0e0;
-            --glass: rgba(255, 255, 255, 0.05);
-        }
-
-        * { box-sizing: border-box; transition: all 0.3s ease; }
-
+        /* إعدادات الخلفية المتحركة */
         body {
-            background-color: var(--bg);
-            color: var(--text);
-            font-family: 'Inter', -apple-system, sans-serif;
             margin: 0;
+            padding: 0;
             display: flex;
-            height: 100vh;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(45deg, #0f0c29, #302b63, #24243e);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
         }
 
-        /* Side Menu */
-        .sidebar {
-            width: 260px;
-            background: var(--sidebar);
-            padding: 15px;
-            display: flex;
-            flex-direction: column;
-            border-left: 1px solid #222;
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
 
-        .new-chat {
-            border: 1px solid #444;
-            padding: 10px;
-            border-radius: 8px;
-            text-align: center;
-            cursor: pointer;
-            margin-bottom: 20px;
-        }
-
-        .new-chat:hover { background: #222; }
-
-        /* Main Chat Area */
-        .main-content {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
+        /* البطاقة الزجاجية */
+        .glass-card {
             position: relative;
-        }
-
-        #chat-container {
-            flex: 1;
-            overflow-y: auto;
-            padding: 50px 15% 100px;
-            display: flex;
-            flex-direction: column;
-            gap: 25px;
-        }
-
-        .msg-wrapper {
-            display: flex;
-            flex-direction: column;
-            max-width: 85%;
-        }
-
-        .user-wrapper { align-self: flex-start; }
-        .ai-wrapper { align-self: flex-end; width: 100%; }
-
-        .bubble {
-            padding: 16px 20px;
-            border-radius: 18px;
-            line-height: 1.6;
-            font-size: 16px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-        }
-
-        .user-bubble {
-            background: var(--accent);
-            color: #000;
-            font-weight: 500;
-        }
-
-        .ai-bubble {
-            background: var(--glass);
-            border: 1px solid #333;
-            backdrop-filter: blur(10px);
-        }
-
-        /* Input Zone */
-        .input-box {
-            position: absolute;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 70%;
-            background: #1e1e1e;
-            border-radius: 15px;
-            padding: 10px;
-            display: flex;
-            border: 1px solid #333;
-        }
-
-        input {
-            flex: 1;
-            background: transparent;
-            border: none;
+            width: 400px;
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 25px 45px rgba(0, 0, 0, 0.2);
+            text-align: center;
             color: white;
-            padding: 12px;
-            outline: none;
-            font-size: 16px;
+            transition: 0.5s;
+            transform: translateY(100px);
+            opacity: 0;
+            animation: slideUp 1s ease forwards;
         }
 
-        button {
-            background: var(--accent);
+        .glass-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+
+        /* تأثيرات النص */
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            background: linear-gradient(to right, #fff, #00d2ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        p {
+            line-height: 1.6;
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        /* الزر الخارق */
+        .magic-btn {
+            margin-top: 30px;
+            padding: 12px 30px;
             border: none;
-            padding: 10px 20px;
-            border-radius: 10px;
-            cursor: pointer;
+            border-radius: 50px;
+            background: #fff;
+            color: #302b63;
             font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+            position: relative;
+            overflow: hidden;
         }
 
-        /* Animations */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        .magic-btn:hover {
+            letter-spacing: 2px;
+            box-shadow: 0 0 20px #00d2ff;
         }
-        .msg-wrapper { animation: fadeIn 0.4s ease forwards; }
 
+        /* الأنيميشن */
+        @keyframes slideUp {
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* الأشكال العائمة في الخلفية */
+        .circle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            z-index: -1;
+            animation: float 10s infinite alternate;
+        }
+
+        @keyframes float {
+            from { transform: translateY(0px) rotate(0deg); }
+            to { transform: translateY(-100px) rotate(360deg); }
+        }
     </style>
 </head>
 <body>
 
-    <div class="sidebar">
-        <div class="new-chat">+ محادثة جديدة</div>
-        <div style="font-size: 12px; color: #666;">السجل (قريباً)</div>
+    <div class="circle" style="width: 200px; height: 200px; top: 10%; left: 10%;"></div>
+    <div class="circle" style="width: 150px; height: 150px; bottom: 10%; right: 20%; background: rgba(0, 210, 255, 0.2);"></div>
+
+    <div class="glass-card">
+        <h1>واجهة الأحلام</h1>
+        <p>مرحباً بك في عالم الخيال، حيث تجتمع التكنولوجيا مع الإبداع لتشكيل تجربة بصرية لا تُنسى.</p>
+        <button class="magic-btn">استكشف السحر</button>
     </div>
 
-    <div class="main-content">
-        <div id="chat-container">
-            <div class="msg-wrapper ai-wrapper">
-                <div class="bubble ai-bubble">مرحباً بك في Radona AI. كيف أساعدك اليوم؟</div>
-            </div>
-        </div>
-
-        <div class="input-box">
-            <input type="text" id="userInput" placeholder="اسألني أي شيء...">
-            <button onclick="sendMsg()">إرسال</button>
-        </div>
-    </div>
-
-    <script>
-        function sendMsg() {
-            const input = document.getElementById('userInput');
-            const container = document.getElementById('chat-container');
-            
-            if (!input.value.trim()) return;
-
-            // User Message
-            container.innerHTML += `
-                <div class="msg-wrapper user-wrapper">
-                    <div class="bubble user-bubble">${input.value}</div>
-                </div>
-            `;
-
-            const val = input.value;
-            input.value = '';
-
-            // AI Loading
-            setTimeout(() => {
-                container.innerHTML += `
-                    <div class="msg-wrapper ai-wrapper">
-                        <div class="bubble ai-bubble">... جاري معالجة طلبك بذكاء</div>
-                    </div>
-                `;
-                container.scrollTop = container.scrollHeight;
-            }, 500);
-        }
-    </script>
 </body>
 </html>
