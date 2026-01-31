@@ -3,92 +3,127 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>المستقبل الرقمي | تجربة خارقة</title>
+    <title>X-CHAT | الدردشة المستقبلية</title>
     <style>
-        /* CSS سريع وقوي */
+        :root {
+            --primary: #00f2fe;
+            --accent: #7000ff;
+            --glass: rgba(15, 15, 25, 0.7);
+        }
+
         body, html {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
+            margin: 0; padding: 0; height: 100%;
+            background: #050505; color: white;
+            font-family: 'Segoe UI', sans-serif;
             overflow: hidden;
-            background-color: #050505;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
-        #canvas-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            z-index: 1;
+        #bg-canvas { position: fixed; top: 0; left: 0; z-index: 1; }
+
+        /* حاوية الشات الرئيسية */
+        .main-container {
+            position: relative; z-index: 10;
+            display: flex; justify-content: center; align-items: center;
+            height: 100vh; width: 100vw;
+            backdrop-filter: blur(5px);
         }
 
-        .ui-layer {
-            position: relative;
-            z-index: 10;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            color: white;
-            pointer-events: none; /* باش تخلي الماوس يتحكم في الـ 3D */
-        }
-
-        .glass-card {
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(15px);
+        .chat-wrapper {
+            width: 90%; max-width: 1000px; height: 80vh;
+            background: var(--glass);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 3rem;
-            border-radius: 30px;
-            text-align: center;
-            pointer-events: auto; /* رجع التفاعل هنا */
-            transform: perspective(1000px) rotateX(0deg);
-            transition: transform 0.3s ease;
+            border-radius: 25px;
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            box-shadow: 0 50px 100px rgba(0,0,0,0.8);
+            overflow: hidden;
+            animation: slideUp 1s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        h1 {
-            font-size: 4rem;
-            margin: 0;
-            background: linear-gradient(to right, #00f2fe, #4facfe, #7000ff);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        /* القائمة الجانبية */
+        .sidebar {
+            background: rgba(0, 0, 0, 0.3);
+            border-left: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 20px;
         }
 
-        p {
-            font-size: 1.2rem;
-            opacity: 0.8;
-            margin-top: 1rem;
+        .contact-item {
+            padding: 15px; border-radius: 12px;
+            margin-bottom: 10px; cursor: pointer;
+            transition: 0.3s; background: rgba(255,255,255,0.03);
         }
 
-        .btn {
-            margin-top: 2rem;
-            padding: 15px 40px;
-            background: white;
-            color: black;
-            border: none;
-            border-radius: 50px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        .contact-item:hover { background: var(--primary); color: black; transform: translateX(-5px); }
+
+        /* منطقة المحادثة */
+        .chat-area {
+            display: flex; flex-direction: column;
+            background: rgba(255, 255, 255, 0.02);
         }
 
-        .btn:hover {
-            transform: scale(1.1) translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0,242,254,0.4);
+        .messages-container {
+            flex: 1; padding: 25px; overflow-y: auto;
+            display: flex; flex-direction: column; gap: 15px;
         }
+
+        .message {
+            max-width: 70%; padding: 12px 18px; border-radius: 15px;
+            font-size: 0.95rem; line-height: 1.4;
+            animation: fadeIn 0.4s ease forwards;
+        }
+
+        .sent { align-self: flex-end; background: linear-gradient(135deg, var(--primary), var(--accent)); color: black; }
+        .received { align-self: flex-start; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.1); }
+
+        /* مدخل النص */
+        .input-bar {
+            padding: 20px; background: rgba(0,0,0,0.2);
+            display: flex; gap: 15px; align-items: center;
+        }
+
+        input {
+            flex: 1; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+            padding: 12px 20px; border-radius: 30px; color: white; outline: none;
+            transition: 0.3s;
+        }
+
+        input:focus { border-color: var(--primary); box-shadow: 0 0 15px rgba(0, 242, 254, 0.2); }
+
+        button#sendBtn {
+            background: var(--primary); border: none; width: 45px; height: 45px;
+            border-radius: 50%; cursor: pointer; font-weight: bold;
+            transition: 0.3s;
+        }
+
+        button#sendBtn:hover { transform: scale(1.1) rotate(-10deg); box-shadow: 0 0 20px var(--primary); }
+
+        @keyframes slideUp { from { opacity: 0; transform: translateY(50px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
     </style>
 </head>
 <body>
 
-    <div id="canvas-container"></div>
+    <canvas id="bg-canvas"></canvas>
 
-    <div class="ui-layer">
-        <div class="glass-card" id="card">
-            <h1>إبداع لا نهائي</h1>
-            <p>مرحباً بك في الجيل القادم من تجربة المستخدم</p>
-            <button class="btn">استكشف العوالم</button>
+    <div class="main-container">
+        <div class="chat-wrapper">
+            <div class="sidebar">
+                <h2 style="color: var(--primary);">X-Chat</h2>
+                <div class="contact-item">👥 المجموعة العامة</div>
+                <div class="contact-item">🤖 بوت الذكاء الاصطناعي</div>
+                <div class="contact-item">🔒 المحادثات المشفرة</div>
+            </div>
+            
+            <div class="chat-area">
+                <div class="messages-container" id="msgBox">
+                    <div class="message received">مرحباً بك في تشات المستقبل! جرب ترسل شي رسالة.</div>
+                </div>
+                
+                <div class="input-bar">
+                    <input type="text" id="userInput" placeholder="اكتب رسالتك هنا...">
+                    <button id="sendBtn">➤</button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -96,74 +131,63 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 
     <script>
-        // إعداد Three.js
+        // --- 1. تأثيرات الخلفية الخارقة (Three.js) ---
         const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-        
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('bg-canvas'), antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
-        document.getElementById('canvas-container').appendChild(renderer.domElement);
 
-        // كريات مضيئة (Particles)
-        const geometry = new THREE.BufferGeometry();
-        const count = 3000;
-        const positions = new Float32Array(count * 3);
+        // كريات متطايرة
+        const starGeo = new THREE.BufferGeometry();
+        const starCount = 2000;
+        const posArray = new Float32Array(starCount * 3);
+        for(let i=0; i<starCount*3; i++) posArray[i] = (Math.random() - 0.5) * 10;
+        starGeo.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+        const starMat = new THREE.PointsMaterial({ size: 0.005, color: 0x00f2fe, transparent: true });
+        const stars = new THREE.Points(starGeo, starMat);
+        scene.add(stars);
+        camera.position.z = 2;
 
-        for(let i = 0; i < count * 3; i++) {
-            positions[i] = (Math.random() - 0.5) * 15;
-        }
-
-        geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-        const material = new THREE.PointsMaterial({
-            size: 0.02,
-            color: 0x00f2fe,
-            transparent: true,
-            opacity: 0.8
-        });
-
-        const points = new THREE.Points(geometry, material);
-        scene.add(points);
-
-        camera.position.z = 5;
-
-        // تفاعل الماوس
-        let mouseX = 0;
-        let mouseY = 0;
-        document.addEventListener('mousemove', (e) => {
-            mouseX = (e.clientX / window.innerWidth - 0.5) * 2;
-            mouseY = (e.clientY / window.innerHeight - 0.5) * 2;
-            
-            // تحريك الكارد بشكل خفيف
-            gsap.to("#card", {
-                rotationY: mouseX * 10,
-                rotationX: -mouseY * 10,
-                duration: 0.5
-            });
-        });
-
-        // Animation Loop
-        function animate() {
-            requestAnimationFrame(animate);
-            
-            points.rotation.y += 0.002;
-            points.rotation.x += 0.001;
-
-            // استجابة الكاميرا للماوس
-            camera.position.x += (mouseX * 2 - camera.position.x) * 0.05;
-            camera.position.y += (-mouseY * 2 - camera.position.y) * 0.05;
-            camera.lookAt(scene.position);
-
+        function animateBg() {
+            requestAnimationFrame(animateBg);
+            stars.rotation.y += 0.001;
             renderer.render(scene, camera);
         }
+        animateBg();
 
-        animate();
+        // --- 2. منطق الدردشة ---
+        const msgBox = document.getElementById('msgBox');
+        const userInput = document.getElementById('userInput');
+        const sendBtn = document.getElementById('sendBtn');
 
-        // تجاوب الشاشة
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
+        function sendMessage() {
+            const text = userInput.value.trim();
+            if(text === "") return;
+
+            // إضافة رسالة المستخدم
+            const msgDiv = document.createElement('div');
+            msgDiv.className = 'message sent';
+            msgDiv.innerText = text;
+            msgBox.appendChild(msgDiv);
+            
+            userInput.value = "";
+            msgBox.scrollTop = msgBox.scrollHeight;
+
+            // محاكاة رد سريع "خارق"
+            setTimeout(() => {
+                const reply = document.createElement('div');
+                reply.className = 'message received';
+                reply.innerText = "وصلت رسالتك! هاد التصميم كيتفاعل مع كل كلمة كتقولها.";
+                msgBox.appendChild(reply);
+                msgBox.scrollTop = msgBox.scrollHeight;
+                
+                // هز الشاشة (Camera Shake) خفيف ملي يوصل الرد
+                gsap.to(".chat-wrapper", { duration: 0.1, x: 5, yoyo: true, repeat: 5 });
+            }, 1000);
+        }
+
+        sendBtn.addEventListener('click', sendMessage);
+        userInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') sendMessage(); });
     </script>
 </body>
 </html>
