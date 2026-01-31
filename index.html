@@ -3,144 +3,173 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>منظومة المراسلة | التطور النهائي</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>منظومة المراسلة | نسخة التطوير 1.1</title>
     <style>
         :root {
-            --primary: #00f2fe;
-            --accent: #7000ff;
-            --glass: rgba(255, 255, 255, 0.05);
-            --border: rgba(255, 255, 255, 0.1);
+            --primary: #0084ff;
+            --bg: #0f172a;
+            --card-bg: #1e293b;
+            --text: #f8fafc;
+            --error: #ff4b2b;
         }
 
-        body, html {
-            margin: 0; padding: 0; height: 100%;
-            background: #0a0a12; /* لون ليلي عميق */
+        body {
+            background: var(--bg);
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            overflow: hidden;
-            display: flex; align-items: center; justify-content: center;
-            color: white;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            color: var(--text);
         }
 
-        /* خلفية متحركة تفاعلية */
-        .bg-glow {
-            position: fixed; width: 400px; height: 400px;
-            background: radial-gradient(circle, var(--accent) 0%, transparent 70%);
-            filter: blur(80px); opacity: 0.2; z-index: -1;
-            animation: move 20s infinite alternate;
-        }
-
-        @keyframes move { from { transform: translate(-50%, -50%); } to { transform: translate(50%, 50%); } }
-
-        /* شاشة تسجيل الدخول المطورة */
+        /* واجهة تسجيل الدخول */
         #login-screen {
-            background: var(--glass);
-            backdrop-filter: blur(20px);
-            padding: 50px; border-radius: 30px;
-            border: 1px solid var(--border);
-            text-align: center; width: 350px;
-            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
-            transition: 0.5s;
+            background: var(--card-bg);
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            width: 90%;
+            max-width: 400px;
+            border: 1px solid rgba(255,255,255,0.1);
         }
 
-        /* واجهة الشات "الخارقة" */
-        #chat-screen {
-            width: 95vw; max-width: 1100px; height: 90vh;
-            background: var(--glass);
-            backdrop-filter: blur(25px);
-            border-radius: 25px;
-            display: none; flex-direction: column;
-            border: 1px solid var(--border);
-            box-shadow: 0 50px 100px rgba(0,0,0,0.7);
-            position: relative;
+        .input-group {
+            margin-bottom: 20px;
+            text-align: right;
         }
 
-        header {
-            padding: 20px; border-bottom: 1px solid var(--border);
-            display: flex; justify-content: space-between; align-items: center;
-            background: rgba(255,255,255,0.02);
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            opacity: 0.8;
         }
 
-        #messages-flow {
-            flex: 1; overflow-y: auto; padding: 30px;
-            display: flex; flex-direction: column; gap: 15px;
-            scrollbar-width: thin; scrollbar-color: var(--primary) transparent;
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            background: #0f172a;
+            color: white;
+            box-sizing: border-box;
+            font-size: 1rem;
+            outline: none;
         }
 
-        /* تصميم الفقاعات (Bubbles) */
-        .msg {
-            max-width: 60%; padding: 12px 20px; border-radius: 20px;
-            position: relative; animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        input:focus {
+            border-color: var(--primary);
         }
 
-        .msg.me {
-            align-self: flex-end;
-            background: linear-gradient(135deg, var(--primary), var(--accent));
-            color: #000; font-weight: 500;
-            border-bottom-right-radius: 2px;
+        .error-msg {
+            color: var(--error);
+            font-size: 0.8rem;
+            margin-top: 5px;
+            display: none;
         }
 
-        .msg.other {
-            align-self: flex-start;
-            background: var(--glass);
-            border: 1px solid var(--border);
-            border-bottom-left-radius: 2px;
-        }
-
-        .sender-name { font-size: 0.7rem; margin-bottom: 5px; opacity: 0.7; letter-spacing: 1px; }
-
-        /* شريط الإدخال */
-        .input-bar {
-            padding: 20px; background: rgba(0,0,0,0.2);
-            display: flex; gap: 15px; border-top: 1px solid var(--border);
-        }
-
-        #msg-input {
-            flex: 1; background: rgba(255,255,255,0.05); border: 1px solid var(--border);
-            padding: 15px 25px; border-radius: 50px; color: white; outline: none;
+        .btn-main {
+            width: 100%;
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 1rem;
             transition: 0.3s;
         }
 
-        #msg-input:focus { border-color: var(--primary); background: rgba(255,255,255,0.1); }
-
-        .btn-send {
-            background: var(--primary); border: none; width: 50px; height: 50px;
-            border-radius: 50%; cursor: pointer; transition: 0.3s;
+        .btn-main:hover {
+            background: #0073e6;
+            transform: translateY(-2px);
         }
 
-        .btn-send:hover { transform: scale(1.1) rotate(-10deg); box-shadow: 0 0 20px var(--primary); }
+        /* واجهة الشات (مخفية) */
+        #chat-screen {
+            width: 100%;
+            max-width: 900px;
+            height: 95vh;
+            background: var(--card-bg);
+            display: none;
+            flex-direction: column;
+            border-radius: 12px;
+            overflow: hidden;
+        }
 
-        @keyframes popIn { from { opacity: 0; transform: scale(0.8) translateY(20px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+        header {
+            padding: 15px 20px;
+            background: #1e293b;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        #messages-flow {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: #0f172a;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .msg {
+            max-width: 75%;
+            padding: 10px 15px;
+            border-radius: 12px;
+            font-size: 0.95rem;
+        }
+
+        .msg.me { align-self: flex-end; background: var(--primary); }
+        .msg.other { align-self: flex-start; background: #334155; }
+
+        .input-bar {
+            padding: 20px;
+            background: #1e293b;
+            display: flex;
+            gap: 10px;
+        }
+
+        #msg-input { flex: 1; }
     </style>
 </head>
 <body>
 
-    <div class="bg-glow"></div>
-
     <div id="login-screen">
-        <i class="fas fa-user-astronaut" style="font-size: 3rem; color: var(--primary); margin-bottom: 20px;"></i>
-        <h2>الولوج للمنظومة</h2>
-        <input type="text" id="username-input" placeholder="اسم المستخدم المستعار..." maxlength="15">
-        <button class="btn-send" onclick="login()" style="width: 100%; border-radius: 10px; color: black; font-weight: bold;">دخول آمن</button>
+        <h2 style="margin-top:0;">تسجيل دخول زائر</h2>
+        
+        <div class="input-group">
+            <label>اسم المستخدم</label>
+            <input type="text" id="username-input" placeholder="مثلاً: reda_dev" maxlength="15">
+            <div id="user-error" class="error-msg">اسم المستخدم غير منطقي (حروف وأرقام فقط، 3-15 حرف)</div>
+        </div>
+
+        <div class="input-group">
+            <label>كلمة المرور</label>
+            <input type="password" id="password-input" placeholder="8 رموز ضرورية" maxlength="8">
+            <div id="pass-error" class="error-msg">كلمة المرور يجب أن تتكون من 8 رموز بالضبط</div>
+        </div>
+
+        <button class="btn-main" onclick="validateAndLogin()">دخول للمنظومة</button>
     </div>
 
     <div id="chat-screen">
         <header>
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <div style="width: 12px; height: 12px; background: #00ff00; border-radius: 50%; box-shadow: 0 0 10px #00ff00;"></div>
-                <span style="font-weight: bold; letter-spacing: 1px;">X-CORE SYSTEM</span>
-            </div>
-            <div id="user-display" style="opacity: 0.7;"></div>
-            <button onclick="logout()" style="background:none; border:1px solid #ff4b2b; color:#ff4b2b; padding: 5px 15px; border-radius: 20px; cursor:pointer;">خروج</button>
+            <div style="font-weight: bold; color: var(--primary);">المنظومة النشطة</div>
+            <div id="user-display"></div>
+            <button onclick="logout()" style="background:none; border:1px solid var(--error); color:var(--error); cursor:pointer; padding:5px 10px; border-radius:5px;">خروج</button>
         </header>
-
         <div id="messages-flow"></div>
-
         <div class="input-bar">
-            <input type="text" id="msg-input" placeholder="أرسل رسالة مشفرة..." autocomplete="off">
-            <button class="btn-send" onclick="send()">
-                <i class="fas fa-paper-plane" style="color: black;"></i>
-            </button>
+            <input type="text" id="msg-input" placeholder="اكتب شيئاً...">
+            <button onclick="send()" style="background:var(--primary); border:none; color:white; padding:0 20px; border-radius:8px; cursor:pointer; font-weight:bold;">إرسال</button>
         </div>
     </div>
 
@@ -148,7 +177,6 @@
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
 
     <script>
-        // دمج الـ Firebase Config ديالك
         const firebaseConfig = {
             apiKey: "AIzaSyBGbP9HXebg4Z5WabWF4CEq9zJ5QEHO7PU",
             databaseURL: "https://realtime-database-df34b-default-rtdb.firebaseio.com",
@@ -162,11 +190,31 @@
 
         window.onload = () => { if (currentUser) showChat(); };
 
-        function login() {
-            const name = document.getElementById('username-input').value.trim();
-            if (name.length >= 3) {
-                localStorage.setItem('chat_user', name);
-                currentUser = name;
+        function validateAndLogin() {
+            const user = document.getElementById('username-input').value.trim();
+            const pass = document.getElementById('password-input').value.trim();
+            
+            // تحقق منطقي لليوزر (حروف وأرقام فقط)
+            const userRegex = /^[a-zA-Z0-9]+$/;
+            let valid = true;
+
+            if (user.length < 3 || !userRegex.test(user)) {
+                document.getElementById('user-error').style.display = 'block';
+                valid = false;
+            } else {
+                document.getElementById('user-error').style.display = 'none';
+            }
+
+            if (pass.length !== 8) {
+                document.getElementById('pass-error').style.display = 'block';
+                valid = false;
+            } else {
+                document.getElementById('pass-error').style.display = 'none';
+            }
+
+            if (valid) {
+                localStorage.setItem('chat_user', user);
+                currentUser = user;
                 showChat();
             }
         }
@@ -174,7 +222,7 @@
         function showChat() {
             document.getElementById('login-screen').style.display = 'none';
             document.getElementById('chat-screen').style.display = 'flex';
-            document.getElementById('user-display').innerText = currentUser;
+            document.getElementById('user-display').innerText = "المستخدم: " + currentUser;
             loadMessages();
         }
 
@@ -196,13 +244,9 @@
                 const isMe = data.user === currentUser;
                 const div = document.createElement('div');
                 div.className = `msg ${isMe ? 'me' : 'other'}`;
-                div.innerHTML = `
-                    <div class="sender-name">${isMe ? 'أنت' : data.user}</div>
-                    <div>${data.text}</div>
-                `;
-                const flow = document.getElementById('messages-flow');
-                flow.appendChild(div);
-                flow.scrollTop = flow.scrollHeight;
+                div.innerHTML = `<div style="font-size:0.7rem; opacity:0.6;">${data.user}</div><div>${data.text}</div>`;
+                document.getElementById('messages-flow').appendChild(div);
+                document.getElementById('messages-flow').scrollTop = document.getElementById('messages-flow').scrollHeight;
             });
         }
 
