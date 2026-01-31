@@ -2,58 +2,92 @@
 <html lang="ar">
 <head>
     <meta charset="UTF-8">
-    <title>النظام الحي | THE ENTITY</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>النظام الجماعي | THE ENTITY</title>
     <style>
-        body { background: #050505; color: #ff0000; font-family: 'Courier New', monospace; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
-        #timer { font-size: 5rem; font-weight: bold; text-shadow: 0 0 20px #ff0000; }
-        .status { margin-top: 20px; font-size: 1rem; color: #555; letter-spacing: 5px; }
+        body { background: #050505; color: #ff0000; font-family: 'Courier New', monospace; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; overflow: hidden; }
+        #timer { font-size: clamp(3rem, 10vw, 6rem); font-weight: bold; text-shadow: 0 0 20px #ff0000; font-variant-numeric: tabular-nums; }
+        .status { margin-top: 20px; font-size: 1rem; color: #555; letter-spacing: 3px; text-transform: uppercase; }
         #action-btn { 
-            margin-top: 50px; padding: 15px 30px; background: transparent; 
+            margin-top: 50px; padding: 20px 40px; background: transparent; 
             border: 2px solid #ff0000; color: #ff0000; cursor: pointer;
-            transition: 0.3s; font-weight: bold;
+            transition: 0.3s; font-weight: bold; font-size: 1.1rem;
         }
-        #action-btn:hover { background: #ff0000; color: #000; box-shadow: 0 0 30px #ff0000; }
-        .warning { color: #444; font-size: 0.7rem; position: absolute; bottom: 20px; }
+        #action-btn:hover { background: #ff0000; color: #000; box-shadow: 0 0 40px #ff0000; }
+        .warning { color: #333; font-size: 0.8rem; position: absolute; bottom: 20px; text-align: center; width: 100%; }
+        .users-online { position: absolute; top: 20px; right: 20px; color: #00ff00; font-size: 0.9rem; }
     </style>
 </head>
 <body>
 
-    <div class="status">العمر المتبقي للنظام</div>
-    <div id="timer">24:00:00</div>
+    <div class="status">عمر النظام المتبقي عالمياً</div>
+    <div id="timer">--:--:--</div>
     
-    <button id="action-btn">تبرع بـ 10 ثواني من حياتك</button>
+    <button id="action-btn">تبرع بـ 10 ثواني للبقاء</button>
 
-    <div class="warning">إذا وصل العداد إلى الصفر، سيختفي هذا الموقع للأبد.</div>
+    <div class="warning">إذا وصل العداد للصفر، سيموت النظام عند الجميع للأبد.</div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
 
     <script>
-        // هاد العداد خاصو يكون مربوط بـ Database (Firebase) باش كاع الناس يشوفو نفس الوقت
-        let timeLeft = 86400; // 24 ساعة بالثواني
-
-        const timerEl = document.getElementById('timer');
-        const btn = document.getElementById('action-btn');
-
-        function updateTimer() {
-            let h = Math.floor(timeLeft / 3600);
-            let m = Math.floor((timeLeft % 3600) / 60);
-            let s = timeLeft % 60;
-            
-            timerEl.innerText = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-            
-            if (timeLeft > 0) {
-                timeLeft--;
-            } else {
-                document.body.innerHTML = "<h1>النظام مات.</h1><p>لقد خذلتموه.</p>";
-            }
-        }
-
-        btn.onclick = () => {
-            // هنا كنحيدو 10 ثواني من وقت المستخدم (مجازاً) ونزيدوها للموقع
-            timeLeft += 10;
-            btn.innerText = "شكراً، لقد أضفت 10 ثواني";
-            setTimeout(() => btn.innerText = "تبرع بـ 10 ثواني أخرى", 2000);
+        // الإعدادات الخاصة بك
+        const firebaseConfig = {
+            apiKey: "AIzaSyBGbP9HXebg4Z5WabWF4CEq9zJ5QEHO7PU",
+            authDomain: "realtime-database-df34b.firebaseapp.com",
+            projectId: "realtime-database-df34b",
+            databaseURL: "https://realtime-database-df34b-default-rtdb.firebaseio.com", // تأكد من هذا الرابط في الكونسول
+            storageBucket: "realtime-database-df34b.firebasestorage.app",
+            messagingSenderId: "142760037940",
+            appId: "1:142760037940:web:7aaa3adef65980d9b28461"
         };
 
-        setInterval(updateTimer, 1000);
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        const timerRef = db.ref('globalTimer');
+
+        // دالة تحويل الثواني لشكل وقت
+        function formatTime(s) {
+            if (s < 0) return "00:00:00";
+            let h = Math.floor(s / 3600);
+            let m = Math.floor((s % 3600) / 60);
+            let sec = s % 60;
+            return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
+        }
+
+        // الاستماع للتغييرات عند الجميع
+        timerRef.on('value', (snapshot) => {
+            let timeLeft = snapshot.val();
+            
+            // إذا كانت أول مرة والمستودع فارغ، نضع 24 ساعة
+            if (timeLeft === null) {
+                timerRef.set(86400);
+                timeLeft = 86400;
+            }
+
+            document.getElementById('timer').innerText = formatTime(timeLeft);
+
+            if (timeLeft <= 0) {
+                document.body.innerHTML = "<h1 style='color:white'>النظام مات.</h1>";
+            }
+        });
+
+        // التبرع بالوقت
+        document.getElementById('action-btn').onclick = () => {
+            timerRef.transaction((currentValue) => {
+                return (currentValue || 0) + 10;
+            });
+        };
+
+        // العداد ينقص ثانية واحدة عند السيرفر (فقط إذا كان هناك متصل)
+        // ملاحظة: في النسخة الاحترافية، يفضل عمل هذا بـ Cloud Functions
+        // لكن للتبسيط، أول واحد يدخل سيبدأ بإنقاص الوقت للجميع
+        setInterval(() => {
+            timerRef.transaction((currentValue) => {
+                if (currentValue && currentValue > 0) return currentValue - 1;
+                return 0;
+            });
+        }, 1000);
     </script>
 </body>
 </html>
