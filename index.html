@@ -3,59 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Radona AI Chat</title>
+    <title>Radona AI Chatbot</title>
     <style>
-        body { font-family: sans-serif; background: #0f172a; color: white; margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; }
-        .chat-container { width: 400px; height: 550px; background: #1e293b; border-radius: 15px; display: flex; flex-direction: column; box-shadow: 0 10px 30px rgba(0,0,0,0.5); overflow: hidden; }
-        #chat-box { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 10px; }
-        .msg { padding: 10px 15px; border-radius: 12px; font-size: 14px; max-width: 80%; }
-        .user { background: #3b82f6; align-self: flex-start; }
-        .bot { background: #334155; align-self: flex-end; }
-        .input-area { padding: 15px; display: flex; gap: 5px; background: #0f172a; }
-        input { flex: 1; padding: 10px; border-radius: 5px; border: none; outline: none; }
-        button { background: #3b82f6; color: white; border: none; padding: 10px; cursor: pointer; border-radius: 5px; }
+        /* ستايل باش يجي الشات فوسط الصفحة وشكله زوين */
+        body { 
+            margin: 0; 
+            padding: 0; 
+            background-color: #0f172a; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            color: white;
+        }
+        .container {
+            text-align: center;
+            width: 90%;
+            max-width: 600px;
+        }
+        h1 { color: #3b82f6; margin-bottom: 20px; }
+        .info { background: #1e293b; padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #334155; }
+        
+        /* هاد الستايل خاص بالـ Widget باش يبان مزيان */
+        hf-chat {
+            --hf-chat-primary-color: #3b82f6;
+            --hf-chat-background-color: #1e293b;
+            --hf-chat-text-color: #ffffff;
+        }
     </style>
 </head>
 <body>
 
-<div class="chat-container">
-    <div id="chat-box"></div>
-    <div class="input-area">
-        <input type="text" id="user-input" placeholder="كتب ميساجك هنا...">
-        <button onclick="sendMessage()">صيفط</button>
+    <div class="container">
+        <h1>Radona AI Bot 🤖</h1>
+        <div class="info">
+            <p>مرحباً بك! هاد البوت خدام بذكاء اصطناعي مجاني.</p>
+            <p>تقدر تسولو بالدارجة ولا بأي لغة بغيتي.</p>
+        </div>
     </div>
-</div>
 
-<script>
-    const HF_TOKEN = "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"; 
+    <script
+        type="module"
+        src="https://gradio.s3-us-west-2.amazonaws.com/4.12.0/gradio.js"
+    ></script>
 
-    async function sendMessage() {
-        const input = document.getElementById('user-input');
-        const box = document.getElementById('chat-box');
-        const text = input.value.trim();
-        if(!text) return;
-
-        box.innerHTML += `<div class="msg user">${text}</div>`;
-        input.value = "";
-
-        try {
-            // غانخدمو بموديل Mistral-7B حيت واعر وفابور
-            const response = await fetch("https://api-inference.huggingface.co/models/Mistralai/Mistral-7B-Instruct-v0.2", {
-                headers: { Authorization: `Bearer ${HF_TOKEN}` },
-                method: "POST",
-                body: JSON.stringify({ inputs: "Answer in Moroccan Darija: " + text }),
-            });
-
-            const result = await response.json();
-            let botReply = result[0].generated_text.split("Answer in Moroccan Darija: " + text).pop();
-
-            box.innerHTML += `<div class="msg bot">${botReply}</div>`;
-            box.scrollTop = box.scrollHeight;
-        } catch (e) {
-            box.innerHTML += `<div class="msg bot">وقع مشكل فالاتصال.</div>`;
-        }
-    }
-</script>
+    <gradio-app 
+        src="https://huggingface.co/spaces/HuggingFaceH4/zephyr-chat" 
+        theme_mode="dark"
+        eager="true"
+        control_page_title="false"
+        initial_height="500px"
+    ></gradio-app>
 
 </body>
 </html>
