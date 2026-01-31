@@ -2,124 +2,110 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CyberAcademy | تعلم الاختراق الأخلاقي</title>
+    <title>CyberAcademy | Terminal Lab</title>
     <style>
-        :root {
-            --primary: #00ff41; /* لون الهكر التقليدي */
-            --bg: #0a0a0b;
-            --card-bg: rgba(20, 20, 25, 0.8);
+        :root { --p: #00ff41; --bg: #050505; }
+        body { background: var(--bg); color: white; font-family: 'Courier New', monospace; margin: 0; padding: 20px; }
+        
+        .header { text-align: center; padding: 40px; border-bottom: 1px solid #222; }
+        .glitch { font-size: 2.5rem; color: var(--p); text-shadow: 0 0 10px var(--p); }
+
+        /* ستايل التيرمينال */
+        .terminal-container {
+            max-width: 800px; margin: 40px auto;
+            background: #000; border: 1px solid #333;
+            border-radius: 10px; overflow: hidden;
+            box-shadow: 0 0 30px rgba(0, 255, 65, 0.1);
         }
-
-        body {
-            margin: 0; background-color: var(--bg); color: white;
-            font-family: 'Courier New', Courier, monospace;
-            overflow-x: hidden;
-        }
-
-        /* تأثير الخلفية المتحركة (Matrix Light) */
-        .grid-bg {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-image: linear-gradient(rgba(0, 255, 65, 0.05) 1px, transparent 1px),
-                              linear-gradient(90deg, rgba(0, 255, 65, 0.05) 1px, transparent 1px);
-            background-size: 30px 30px; z-index: -1;
-        }
-
-        header {
-            height: 60vh; display: flex; flex-direction: column;
-            justify-content: center; align-items: center; text-align: center;
-            background: radial-gradient(circle, rgba(0,255,65,0.1) 0%, transparent 70%);
-        }
-
-        .glitch {
-            font-size: 3.5rem; font-weight: bold; text-transform: uppercase;
-            color: var(--primary); text-shadow: 0 0 10px var(--primary);
-            position: relative;
-        }
-
-        /* حاوية المسارات التعليمية */
-        .container {
-            max-width: 1200px; margin: -50px auto 50px auto;
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 25px; padding: 20px;
-        }
-
-        .course-card {
-            background: var(--card-bg); border: 1px solid #333;
-            border-radius: 10px; padding: 25px; transition: 0.4s;
-            position: relative; overflow: hidden;
-        }
-
-        .course-card:hover {
-            border-color: var(--primary);
-            transform: translateY(-10px);
-            box-shadow: 0 0 20px rgba(0, 255, 65, 0.2);
-        }
-
-        .course-card h3 { color: var(--primary); margin-top: 0; }
-
-        .btn {
-            display: inline-block; margin-top: 15px;
-            padding: 10px 20px; border: 1px solid var(--primary);
-            color: var(--primary); text-decoration: none; border-radius: 5px;
-            transition: 0.3s;
-        }
-
-        .btn:hover { background: var(--primary); color: black; }
-
-        /* تيرمينال صغير للشرح */
-        .terminal-text {
-            background: #000; padding: 10px; border-radius: 5px;
-            font-size: 0.8rem; color: #888; border-right: 3px solid var(--primary);
-            width: fit-content; margin: 20px auto;
-        }
+        .term-header { background: #1a1a1a; padding: 10px; font-size: 0.8rem; color: #888; display: flex; gap: 10px; }
+        .dot { width: 12px; height: 12px; border-radius: 50%; }
+        
+        #history { height: 300px; overflow-y: auto; padding: 20px; font-size: 0.9rem; line-height: 1.6; }
+        .input-line { display: flex; padding: 0 20px 20px; color: var(--p); }
+        #user-input { background: transparent; border: none; color: white; outline: none; flex: 1; font-family: inherit; font-size: 0.9rem; margin-right: 10px; }
+        
+        .path-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; max-width: 1000px; margin: 40px auto; }
+        .card { background: #111; border: 1px solid #222; padding: 20px; border-radius: 8px; transition: 0.3s; }
+        .card:hover { border-color: var(--p); transform: translateY(-5px); }
+        .card h3 { color: var(--p); margin-top: 0; }
     </style>
 </head>
 <body>
 
-    <div class="grid-bg"></div>
+    <div class="header">
+        <h1 class="glitch">CYBER_LAB v1.0</h1>
+        <p>تعلم الأمن السيبراني بالتطبيق المباشر</p>
+    </div>
 
-    <header>
-        <div class="terminal-text">> Initializing Learning_Modules... OK</div>
-        <h1 class="glitch">CyberAcademy.exe</h1>
-        <p>احترف فنون الأمن السيبراني من الصفر إلى الاحتراف</p>
-    </header>
-
-    <div class="container">
-        <div class="course-card">
-            <h3>🌐 اختبار اختراق الويب</h3>
-            <p>تعلم ثغرات XSS, SQLi وكيفية حماية السيرفرات من الهجمات الحديثة.</p>
-            <a href="#" class="btn">بدء التعلم _</a>
+    <div class="terminal-container">
+        <div class="term-header">
+            <div class="dot" style="background: #ff5f56;"></div>
+            <div class="dot" style="background: #ffbd2e;"></div>
+            <div class="dot" style="background: #27c93f;"></div>
+            <span>root@kali: ~/academy</span>
         </div>
-
-        <div class="course-card">
-            <h3>🛡️ أمن الشبكات</h3>
-            <p>فهم بروتوكولات TCP/IP، تحليل الحزم باستخدام Wireshark وحماية الراوترات.</p>
-            <a href="#" class="btn">استكشاف المودول _</a>
+        <div id="history">
+            <div>[+] Welcome to CyberAcademy Virtual Terminal.</div>
+            <div>[+] Type <span style="color:var(--p)">'help'</span> to see available commands.</div>
         </div>
+        <div class="input-line">
+            <span>kali@root:~$ </span>
+            <input type="text" id="user-input" autofocus>
+        </div>
+    </div>
 
-        <div class="course-card">
-            <h3>🕵️ التحقيق الرقمي</h3>
-            <p>تعلم كيف تتبع الأثر الرقمي للمخترقين وجمع الأدلة القانونية.</p>
-            <a href="#" class="btn">دخول المختبر _</a>
+    <div class="path-cards">
+        <div class="card">
+            <h3>01. Reconnaissance</h3>
+            <p>تعلم كيف تجمع المعلومات عن الهدف باستخدام Nmap و Shodan.</p>
+        </div>
+        <div class="card">
+            <h3>02. Exploitation</h3>
+            <p>تعرف على ثغرات الأنظمة وكيفية استغلالها بشكل أخلاقي.</p>
+        </div>
+        <div class="card">
+            <h3>03. Privilege Escalation</h3>
+            <p>كيف تنتقل من مستخدم عادي إلى Root داخل النظام.</p>
         </div>
     </div>
 
     <script>
-        // تأثير بسيط للكتابة التلقائية في العنوان
-        const title = document.querySelector('.glitch');
-        const text = title.innerText;
-        title.innerText = '';
-        let i = 0;
+        const input = document.getElementById('user-input');
+        const history = document.getElementById('history');
 
-        function typeWriter() {
-            if (i < text.length) {
-                title.innerText += text.charAt(i);
-                i++;
-                setTimeout(typeWriter, 150);
+        const commands = {
+            'help': 'Available commands: <br>- <b>ls</b>: List directories<br>- <b>whoami</b>: Current user<br>- <b>nmap</b>: Scan network<br>- <b>clear</b>: Clear terminal',
+            'ls': 'courses/ &nbsp;&nbsp; labs/ &nbsp;&nbsp; tools/ &nbsp;&nbsp; secret.txt',
+            'whoami': 'root (The Future Pentester)',
+            'nmap': 'Scanning target... <br>[+] Port 80: OPEN (HTTP)<br>[+] Port 22: OPEN (SSH)<br>[+] Scan complete.',
+            'secret.txt': 'Nice try! But you need to learn Privilege Escalation first.',
+            'clear': ''
+        };
+
+        input.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                const cmd = input.value.toLowerCase().trim();
+                const line = document.createElement('div');
+                line.innerHTML = `<span style="color:#888">kali@root:~$</span> ${cmd}`;
+                history.appendChild(line);
+
+                if (cmd === 'clear') {
+                    history.innerHTML = '';
+                } else if (commands[cmd]) {
+                    const response = document.createElement('div');
+                    response.innerHTML = commands[cmd];
+                    history.appendChild(response);
+                } else {
+                    const error = document.createElement('div');
+                    error.style.color = 'red';
+                    error.innerHTML = `Command '${cmd}' not found. Try 'help'.`;
+                    history.appendChild(error);
+                }
+
+                input.value = '';
+                history.scrollTop = history.scrollHeight;
             }
-        }
-        typeWriter();
+        });
     </script>
 </body>
 </html>
