@@ -2,272 +2,196 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>X-CORE | الديوان السِّيادي المطور</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>X-CORE | صراع العروش</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Playfair+Display:ital,wght@0,700;1,900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@900&family=Amiri:wght@700&display=swap');
 
         :root {
             --gold: #d4af37;
-            --gold-soft: #f9e29f;
-            --bg-dark: #0a0a0b;
-            --paper: #eaddca;
-            --wine: #4a0404;
+            --wood: #1a0a05;
+            --velvet: #4a0404;
         }
 
-        body, html {
-            margin: 0; padding: 0; height: 100%;
-            background: var(--bg-dark);
-            font-family: 'Amiri', serif; overflow: hidden;
-            color: var(--gold-soft);
+        body {
+            margin: 0; padding: 0; height: 100vh;
+            background: #000; font-family: 'Amiri', serif;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            overflow: hidden; touch-action: manipulation;
         }
 
-        /* خلفية ضوئية ناعمة */
-        .ambient-bg {
-            position: fixed; width: 100%; height: 100%;
-            background: radial-gradient(circle at 50% -20%, #2a2a3a 0%, #000 80%);
-            z-index: -1;
+        /* حاوية اللعبة */
+        #game-container {
+            width: 95vw; max-width: 500px; height: 80vh;
+            background: var(--wood); border: 4px double var(--gold);
+            position: relative; display: flex; flex-direction: column;
+            box-shadow: 0 0 50px rgba(0,0,0,1);
         }
 
-        /* واجهة الدخول الفخمة */
-        #login-section {
-            height: 100vh; display: flex; align-items: center; justify-content: center;
+        .battle-info {
+            height: 100px; background: var(--velvet);
+            border-bottom: 2px solid var(--gold);
+            display: flex; justify-content: space-around; align-items: center;
+            color: var(--gold); font-family: 'Playfair Display', serif;
         }
 
-        .auth-vault {
-            background: rgba(15, 15, 15, 0.9);
-            padding: 50px; border: 1px solid var(--gold);
-            box-shadow: 0 0 80px rgba(0,0,0,1), inset 0 0 30px rgba(212,175,55,0.05);
-            width: 380px; text-align: center; border-radius: 2px;
-            backdrop-filter: blur(10px); animation: fadeIn 1.5s ease;
-        }
-
-        h1 { font-family: 'Playfair Display', serif; font-size: 2.2rem; letter-spacing: 3px; margin-bottom: 30px; color: var(--gold); }
-
-        .input-wrap { position: relative; margin-bottom: 25px; }
-        
-        input {
-            width: 100%; background: transparent; border: none;
-            border-bottom: 1.5px solid #333; padding: 12px;
-            color: #fff; font-size: 1.2rem; outline: none;
-            transition: 0.4s; text-align: center; font-family: sans-serif;
-        }
-
-        input:focus { border-bottom-color: var(--gold); background: rgba(212,175,55,0.03); }
-
-        .btn-royal {
-            background: var(--gold); color: #000; border: none;
-            padding: 15px 40px; font-family: 'Playfair Display', serif;
-            font-weight: 900; cursor: pointer; font-size: 1.1rem;
-            width: 100%; transition: 0.4s; letter-spacing: 2px;
-        }
-
-        .btn-royal:hover { background: var(--gold-soft); box-shadow: 0 0 30px var(--gold); }
-
-        /* واجهة الشات (التخطيط الملكي) */
-        #main-app {
-            display: none; height: 100vh; grid-template-columns: 320px 1fr;
-        }
-
-        .sidebar {
-            background: #0d0d0d; border-left: 1px solid var(--gold);
+        /* ساحة المعركة */
+        #battle-field {
+            flex: 1; position: relative; background: url('https://www.transparenttextures.com/patterns/dark-leather.png');
             display: flex; flex-direction: column;
         }
 
-        .sidebar-header { padding: 20px; border-bottom: 1px solid var(--gold); text-align: center; }
+        /* شريط القوة (The Power Bar) */
+        .power-bar {
+            width: 100%; height: 50%; transition: height 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        #p1-bar { background: var(--gold); }
+        #p2-bar { background: var(--velvet); }
 
-        .user-item {
-            padding: 20px; border-bottom: 1px solid rgba(212,175,55,0.05);
-            cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: space-between;
+        /* زر الهجوم الفخم */
+        .attack-btn {
+            position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+            width: 120px; height: 120px; border-radius: 50%;
+            background: radial-gradient(circle, var(--gold) 0%, #a67c00 100%);
+            border: 5px solid var(--wood); color: var(--wood);
+            font-size: 1.5rem; font-weight: bold; cursor: pointer;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+            display: flex; align-items: center; justify-content: center;
+            user-select: none; -webkit-tap-highlight-color: transparent;
         }
 
-        .user-item:hover { background: rgba(212,175,55,0.05); }
+        .attack-btn:active { transform: translateX(-50%) scale(0.9); box-shadow: 0 5px 10px rgba(0,0,0,0.8); }
 
-        .chat-area { display: flex; flex-direction: column; background: #080808; }
-
-        .messages-flow { flex: 1; padding: 40px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
-
-        /* فقاعات الرسائل */
-        .bubble {
-            max-width: 65%; padding: 12px 20px; border-radius: 4px;
-            font-size: 1.1rem; position: relative; animation: pop 0.3s ease;
+        /* واجهة الدخول للعبة */
+        #lobby {
+            position: absolute; inset: 0; background: var(--wood); z-index: 100;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: 20px; text-align: center;
         }
-        .bubble.me { align-self: flex-end; background: var(--gold); color: #000; font-weight: bold; }
-        .bubble.other { align-self: flex-start; background: var(--wine); color: var(--gold-soft); border: 1px solid var(--gold); }
 
-        .input-bar { padding: 25px; background: #000; display: flex; gap: 15px; border-top: 1px solid var(--gold); }
+        .gold-input {
+            background: rgba(255,255,255,0.05); border: 1px solid var(--gold);
+            color: var(--gold); padding: 15px; margin: 10px; width: 80%; text-align: center;
+        }
 
-        .unread-dot { width: 10px; height: 10px; background: #ff4444; border-radius: 50%; box-shadow: 0 0 10px #ff4444; }
-
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } }
-        @keyframes pop { from { transform: scale(0.95); opacity: 0; } }
+        .win-screen {
+            position: absolute; inset: 0; background: rgba(0,0,0,0.9);
+            display: none; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 200; color: var(--gold);
+        }
     </style>
 </head>
 <body>
 
-<div class="ambient-bg"></div>
+    <div id="game-container">
+        <div id="lobby">
+            <h1 style="color:var(--gold); font-size: 2.5rem;">صِرَاع المُلُوك</h1>
+            <p style="color: #ccc;">أدخل معرفك الملكي لبدء المبارزة</p>
+            <input type="text" id="p-name" class="gold-input" placeholder="المعرف (A-Z)" maxlength="6">
+            <button class="attack-btn" style="position:static; transform:none; border-radius:10px; height:60px; width:200px;" onclick="joinGame()">دخول</button>
+        </div>
 
-<div id="login-section">
-    <div class="auth-vault">
-        <h1>الديوان المَلَكي</h1>
-        <div class="input-wrap">
-            <input type="text" id="username" placeholder="المعرف (A-Z, 0-9)" maxlength="6">
+        <div class="battle-info">
+            <div id="p1-label">أنت: 0</div>
+            <div style="font-size: 1.5rem;">VS</div>
+            <div id="p2-label">الخصم: 0</div>
         </div>
-        <div class="input-wrap">
-            <input type="password" id="password" placeholder="كلمة المرور (8 رموز)" maxlength="8">
-        </div>
-        <button class="btn-royal" id="loginBtn" onclick="processAuth()">تـصـديـق الـدخول</button>
-        <p id="error-log" style="color: #ff6b6b; font-size: 0.8rem; margin-top: 15px; display: none;"></p>
-    </div>
-</div>
 
-<div id="main-app">
-    <div class="sidebar">
-        <div class="sidebar-header">
-            <small style="color: var(--gold);">مرحباً بالسيد:</small>
-            <div id="my-name" style="font-size: 1.5rem; font-weight: bold;"></div>
-            <button onclick="logout()" style="background:none; border:1px solid #ff4444; color:#ff4444; margin-top:10px; cursor:pointer;">خروج</button>
+        <div id="battle-field">
+            <div id="p2-bar" class="power-bar" style="height: 50%;"></div>
+            <div id="p1-bar" class="power-bar" style="height: 50%;"></div>
+            <div class="attack-btn" id="attack-trigger">اضغط!</div>
         </div>
-        <div id="users-list" style="flex:1; overflow-y:auto;"></div>
-    </div>
-    <div class="chat-area">
-        <div class="sidebar-header" id="chat-target-name" style="text-align: right;">اختر مراسلاً لبدء المداولة...</div>
-        <div class="messages-flow" id="msg-flow"></div>
-        <div class="input-bar">
-            <input type="text" id="msg-input" placeholder="اكتب مراسلتك هنا..." style="flex:1; border-radius:0; border-bottom:1px solid var(--gold);">
-            <button class="btn-royal" style="width:auto; padding: 10px 30px;" onclick="sendMessage()">إرسال</button>
+
+        <div class="win-screen" id="win-screen">
+            <h1 id="win-text">لقد انتصرت!</h1>
+            <button onclick="location.reload()" style="background:var(--gold); border:none; padding:10px 30px; cursor:pointer;">العودة للديوان</button>
         </div>
     </div>
-</div>
 
-<audio id="bell" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3"></audio>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
 
-<script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBGbP9HXebg4Z5WabWF4CEq9zJ5QEHO7PU",
+            databaseURL: "https://realtime-database-df34b-default-rtdb.firebaseio.com",
+            projectId: "realtime-database-df34b"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
 
-<script>
-    const firebaseConfig = {
-        apiKey: "AIzaSyBGbP9HXebg4Z5WabWF4CEq9zJ5QEHO7PU",
-        databaseURL: "https://realtime-database-df34b-default-rtdb.firebaseio.com",
-        projectId: "realtime-database-df34b"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
+        let myID = "";
+        let gameID = "royal_duel_1"; // يمكن تطويرها لتكون غرف متعددة
+        let myScore = 50;
 
-    let currentUser = localStorage.getItem('v4_user');
-    let targetUser = null;
-
-    // الدخول التلقائي إذا كان الحساب محفوظاً
-    if(currentUser) { startApp(); }
-
-    async function processAuth() {
-        const u = document.getElementById('username').value.trim();
-        const p = document.getElementById('password').value.trim();
-        const err = document.getElementById('error-log');
-        const regex = /^[a-zA-Z0-9]+$/;
-
-        if(!regex.test(u) || u.length < 3 || u.length > 6) {
-            showError("المعرف يجب أن يكون حروف انجليزية وأرقام فقط (3-6 رموز)");
-            return;
-        }
-        if(p.length !== 8) {
-            showError("كلمة المرور يجب أن تكون 8 رموز بالضبط");
-            return;
+        function joinGame() {
+            myID = document.getElementById('p-name').value.trim();
+            if(myID.length < 3) return alert("الاسم قصير جداً");
+            
+            document.getElementById('lobby').style.display = 'none';
+            initGame();
         }
 
-        // نظام فحص تكرار اليوزر
-        const snap = await db.ref('users/' + u).get();
-        if(snap.exists()) {
-            if(snap.val().pass !== p) {
-                showError("هذا المعرف محجوز مسبقاً! كلمة المرور خاطئة.");
-                return;
-            }
-        } else {
-            // تسجيل حساب جديد
-            await db.ref('users/' + u).set({ pass: p });
-        }
+        function initGame() {
+            const gameRef = db.ref('games/' + gameID);
 
-        currentUser = u;
-        localStorage.setItem('v4_user', u);
-        startApp();
-    }
+            // الاستماع لتغيرات القوة
+            gameRef.on('value', (snap) => {
+                const data = snap.val();
+                if(!data) return;
 
-    function showError(txt) {
-        const err = document.getElementById('error-log');
-        err.innerText = txt; err.style.display = 'block';
-    }
+                // تحديث الواجهة
+                const p1Score = data[myID] || 50;
+                let p2Score = 50;
+                let otherPlayer = "الخصم";
 
-    function startApp() {
-        document.getElementById('login-section').style.display = 'none';
-        document.getElementById('main-app').style.display = 'grid';
-        document.getElementById('my-name').innerText = currentUser;
-        
-        db.ref('presence/' + currentUser).set(true);
-        db.ref('presence/' + currentUser).onDisconnect().remove();
-
-        listenForUsers();
-        listenForGlobalNotifs();
-    }
-
-    function listenForUsers() {
-        db.ref('presence').on('value', (snap) => {
-            const list = document.getElementById('users-list');
-            list.innerHTML = '';
-            snap.forEach(u => {
-                if(u.key !== currentUser) {
-                    const div = document.createElement('div');
-                    div.className = 'user-item';
-                    div.id = 'u-' + u.key;
-                    div.innerHTML = `<span>السيد: ${u.key}</span><div class="dot-box"></div>`;
-                    div.onclick = () => openPrivateChat(u.key);
-                    list.appendChild(div);
+                for(let key in data) {
+                    if(key !== myID) {
+                        p2Score = data[key];
+                        otherPlayer = key;
+                    }
                 }
+
+                // حساب النسب المئوية للشريط
+                const total = p1Score + p2Score;
+                const p1Percent = (p1Score / total) * 100;
+                const p2Percent = (p2Score / total) * 100;
+
+                document.getElementById('p1-bar').style.height = p1Percent + "%";
+                document.getElementById('p2-bar').style.height = p2Percent + "%";
+                document.getElementById('p1-label').innerText = `أنت: ${Math.floor(p1Percent)}%`;
+                document.getElementById('p2-label').innerText = `${otherPlayer}: ${Math.floor(p2Percent)}%`;
+
+                // فحص الفوز
+                if(p1Percent >= 90) endGame("لقد سحقت الخصم!");
+                if(p2Percent >= 90) endGame("لقد تمت هزيمتك!");
             });
-        });
-    }
 
-    function openPrivateChat(target) {
-        targetUser = target;
-        document.getElementById('chat-target-name').innerText = "مداولة سرية مع: " + target;
-        document.getElementById('u-' + target).querySelector('.dot-box').innerHTML = '';
-        loadMessages();
-    }
+            // حدث الضغط للهجوم
+            const trigger = document.getElementById('attack-trigger');
+            const handleAttack = () => {
+                db.ref('games/' + gameID + '/' + myID).transaction(current => (current || 50) + 2);
+                // نقص من الخصم قليلاً
+                gameRef.once('value', snap => {
+                    snap.forEach(child => {
+                        if(child.key !== myID) {
+                            db.ref('games/' + gameID + '/' + child.key).transaction(c => (c || 50) - 1);
+                        }
+                    });
+                });
+            };
 
-    function loadMessages() {
-        const flow = document.getElementById('msg-flow');
-        flow.innerHTML = '';
-        const chatID = [currentUser, targetUser].sort().join('_');
-        db.ref('chats/' + chatID).off();
-        db.ref('chats/' + chatID).on('child_added', (snap) => {
-            const data = snap.val();
-            const div = document.createElement('div');
-            div.className = `bubble ${data.from === currentUser ? 'me' : 'other'}`;
-            div.innerText = data.msg;
-            flow.appendChild(div);
-            flow.scrollTop = flow.scrollHeight;
-        });
-    }
+            trigger.addEventListener('touchstart', (e) => { e.preventDefault(); handleAttack(); });
+            trigger.addEventListener('mousedown', handleAttack);
+        }
 
-    function sendMessage() {
-        const inp = document.getElementById('msg-input');
-        if(!targetUser || inp.value === '') return;
-        const chatID = [currentUser, targetUser].sort().join('_');
-        db.ref('chats/' + chatID).push({ from: currentUser, msg: inp.value });
-        db.ref('notifs/' + targetUser).set({ from: currentUser, time: Date.now() });
-        inp.value = '';
-    }
-
-    function listenForGlobalNotifs() {
-        db.ref('notifs/' + currentUser).on('value', (snap) => {
-            if(snap.val() && snap.val().from !== targetUser) {
-                document.getElementById('bell').play();
-                const uBox = document.getElementById('u-' + snap.val().from);
-                if(uBox) uBox.querySelector('.dot-box').innerHTML = '<div class="unread-dot"></div>';
-            }
-        });
-    }
-
-    function logout() { localStorage.clear(); location.reload(); }
-    document.getElementById('msg-input').onkeypress = (e) => { if(e.key === 'Enter') sendMessage(); };
-</script>
+        function endGame(msg) {
+            const screen = document.getElementById('win-screen');
+            screen.style.display = 'flex';
+            document.getElementById('win-text').innerText = msg;
+            db.ref('games/' + gameID).remove(); // إعادة ضبط اللعبة
+        }
+    </script>
 </body>
 </html>
