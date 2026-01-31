@@ -3,109 +3,98 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>X-CORE | صراع العروش</title>
+    <title>X-CORE | مجمع القاعات الملكية</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@900&family=Amiri:wght@700&display=swap');
 
         :root {
             --gold: #d4af37;
-            --wood: #1a0a05;
+            --wood: #0d0d0d;
             --velvet: #4a0404;
+            --border: 2px solid var(--gold);
         }
 
         body {
-            margin: 0; padding: 0; height: 100vh;
-            background: #000; font-family: 'Amiri', serif;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            overflow: hidden; touch-action: manipulation;
+            margin: 0; background: #000; font-family: 'Amiri', serif;
+            color: var(--gold); display: flex; align-items: center; justify-content: center; height: 100vh;
         }
 
-        /* حاوية اللعبة */
-        #game-container {
-            width: 95vw; max-width: 500px; height: 80vh;
-            background: var(--wood); border: 4px double var(--gold);
-            position: relative; display: flex; flex-direction: column;
-            box-shadow: 0 0 50px rgba(0,0,0,1);
+        /* حاوية الرومات */
+        #lobby-manager {
+            width: 90vw; max-width: 500px; background: var(--wood);
+            border: var(--border); padding: 30px; box-shadow: 0 0 50px rgba(0,0,0,1);
+            text-align: center; position: relative;
         }
 
-        .battle-info {
-            height: 100px; background: var(--velvet);
-            border-bottom: 2px solid var(--gold);
-            display: flex; justify-content: space-around; align-items: center;
-            color: var(--gold); font-family: 'Playfair Display', serif;
+        .room-card {
+            background: rgba(212, 175, 55, 0.05); border: 1px solid rgba(212, 175, 55, 0.2);
+            padding: 15px; margin-top: 15px; display: flex; justify-content: space-between; align-items: center;
+            transition: 0.3s;
         }
 
-        /* ساحة المعركة */
-        #battle-field {
-            flex: 1; position: relative; background: url('https://www.transparenttextures.com/patterns/dark-leather.png');
-            display: flex; flex-direction: column;
+        .room-card:hover { border-color: var(--gold); background: rgba(212, 175, 55, 0.1); }
+
+        .btn-gold {
+            background: var(--gold); color: #000; border: none; padding: 10px 20px;
+            font-family: 'Playfair Display', serif; font-weight: 900; cursor: pointer;
+            transition: 0.3s;
         }
 
-        /* شريط القوة (The Power Bar) */
-        .power-bar {
-            width: 100%; height: 50%; transition: height 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        .btn-gold:hover { transform: scale(1.05); box-shadow: 0 0 20px var(--gold); }
+
+        .btn-join { background: transparent; color: var(--gold); border: 1px solid var(--gold); padding: 5px 15px; cursor: pointer; }
+
+        input {
+            background: #1a1a1a; border: 1px solid #333; color: #fff;
+            padding: 12px; width: 100%; box-sizing: border-box; margin-bottom: 10px; text-align: center;
         }
+
+        /* واجهة اللعبة (مخفية) */
+        #game-arena { display: none; width: 100vw; height: 100vh; flex-direction: column; }
+
+        #battle-field { flex: 1; position: relative; background: var(--wood); display: flex; flex-direction: column; overflow: hidden; }
+
+        .power-bar { width: 100%; transition: height 0.2s; }
         #p1-bar { background: var(--gold); }
         #p2-bar { background: var(--velvet); }
 
-        /* زر الهجوم الفخم */
         .attack-btn {
-            position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
-            width: 120px; height: 120px; border-radius: 50%;
-            background: radial-gradient(circle, var(--gold) 0%, #a67c00 100%);
-            border: 5px solid var(--wood); color: var(--wood);
-            font-size: 1.5rem; font-weight: bold; cursor: pointer;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
-            display: flex; align-items: center; justify-content: center;
-            user-select: none; -webkit-tap-highlight-color: transparent;
-        }
-
-        .attack-btn:active { transform: translateX(-50%) scale(0.9); box-shadow: 0 5px 10px rgba(0,0,0,0.8); }
-
-        /* واجهة الدخول للعبة */
-        #lobby {
-            position: absolute; inset: 0; background: var(--wood); z-index: 100;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            padding: 20px; text-align: center;
-        }
-
-        .gold-input {
-            background: rgba(255,255,255,0.05); border: 1px solid var(--gold);
-            color: var(--gold); padding: 15px; margin: 10px; width: 80%; text-align: center;
-        }
-
-        .win-screen {
-            position: absolute; inset: 0; background: rgba(0,0,0,0.9);
-            display: none; flex-direction: column; align-items: center; justify-content: center;
-            z-index: 200; color: var(--gold);
+            position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
+            width: 100px; height: 100px; border-radius: 50%; background: var(--gold);
+            border: 5px solid #000; color: #000; font-weight: 900;
+            display: flex; align-items: center; justify-content: center; cursor: pointer;
+            user-select: none; z-index: 10; touch-action: manipulation;
         }
     </style>
 </head>
 <body>
 
-    <div id="game-container">
-        <div id="lobby">
-            <h1 style="color:var(--gold); font-size: 2.5rem;">صِرَاع المُلُوك</h1>
-            <p style="color: #ccc;">أدخل معرفك الملكي لبدء المبارزة</p>
-            <input type="text" id="p-name" class="gold-input" placeholder="المعرف (A-Z)" maxlength="6">
-            <button class="attack-btn" style="position:static; transform:none; border-radius:10px; height:60px; width:200px;" onclick="joinGame()">دخول</button>
+    <div id="lobby-manager">
+        <h1 style="font-family:'Playfair Display'; font-size: 2rem;">قاعات المُبارزة</h1>
+        
+        <div id="user-setup">
+            <input type="text" id="player-name" placeholder="اسمك الملكي" maxlength="6">
+            <input type="text" id="new-room-name" placeholder="اسم القاعة الجديدة">
+            <button class="btn-gold" onclick="createRoom()">إنشاء قاعة جديدة</button>
         </div>
 
-        <div class="battle-info">
-            <div id="p1-label">أنت: 0</div>
-            <div style="font-size: 1.5rem;">VS</div>
-            <div id="p2-label">الخصم: 0</div>
-        </div>
+        <hr style="border: 0; border-top: 1px solid #333; margin: 25px 0;">
+        
+        <h3 style="text-align: right; font-size: 0.9rem;">القاعات النشطة:</h3>
+        <div id="rooms-list">
+            </div>
+    </div>
 
+    <div id="game-arena">
+        <div style="background:var(--velvet); padding:10px; display:flex; justify-content:space-around; border-bottom:var(--border);">
+            <div id="p1-label">أنت: 50%</div>
+            <div id="room-title">القاعة</div>
+            <div id="p2-label">الخصم: 50%</div>
+        </div>
         <div id="battle-field">
             <div id="p2-bar" class="power-bar" style="height: 50%;"></div>
             <div id="p1-bar" class="power-bar" style="height: 50%;"></div>
-            <div class="attack-btn" id="attack-trigger">اضغط!</div>
-        </div>
-
-        <div class="win-screen" id="win-screen">
-            <h1 id="win-text">لقد انتصرت!</h1>
-            <button onclick="location.reload()" style="background:var(--gold); border:none; padding:10px 30px; cursor:pointer;">العودة للديوان</button>
+            <div class="attack-btn" id="hit-btn">اضرب!</div>
         </div>
     </div>
 
@@ -121,76 +110,93 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        let myID = "";
-        let gameID = "royal_duel_1"; // يمكن تطويرها لتكون غرف متعددة
-        let myScore = 50;
+        let myName = "";
+        let currentRoom = null;
 
-        function joinGame() {
-            myID = document.getElementById('p-name').value.trim();
-            if(myID.length < 3) return alert("الاسم قصير جداً");
+        // تحديث قائمة الرومات تلقائياً
+        db.ref('royal_rooms').on('value', snap => {
+            const list = document.getElementById('rooms-list');
+            list.innerHTML = '';
+            snap.forEach(room => {
+                const data = room.val();
+                const div = document.createElement('div');
+                div.className = 'room-card';
+                div.innerHTML = `
+                    <span style="font-weight:bold">${room.key}</span>
+                    <span style="font-size:0.8rem; color:#888">${Object.keys(data.players || {}).length}/2 لاعبين</span>
+                    <button class="btn-join" onclick="joinRoom('${room.key}')">دخول</button>
+                `;
+                list.appendChild(div);
+            });
+        });
+
+        function createRoom() {
+            const rName = document.getElementById('new-room-name').value.trim();
+            const pName = document.getElementById('player-name').value.trim();
+            if(!rName || !pName) return alert("عمر الخانات أولاً!");
             
-            document.getElementById('lobby').style.display = 'none';
-            initGame();
+            myName = pName;
+            currentRoom = rName;
+            
+            db.ref('royal_rooms/' + rName).set({
+                created: Date.now(),
+                players: { [pName]: 50 }
+            }).then(() => startGame(rName));
         }
 
-        function initGame() {
-            const gameRef = db.ref('games/' + gameID);
+        function joinRoom(rName) {
+            const pName = document.getElementById('player-name').value.trim();
+            if(!pName) return alert("اكتب اسمك أولاً!");
+            
+            myName = pName;
+            currentRoom = rName;
 
-            // الاستماع لتغيرات القوة
-            gameRef.on('value', (snap) => {
-                const data = snap.val();
-                if(!data) return;
+            db.ref('royal_rooms/' + rName + '/players/' + pName).set(50);
+            startGame(rName);
+        }
 
-                // تحديث الواجهة
-                const p1Score = data[myID] || 50;
+        function startGame(rName) {
+            document.getElementById('lobby-manager').style.display = 'none';
+            document.getElementById('game-arena').style.display = 'flex';
+            document.getElementById('room-title').innerText = "قاعة: " + rName;
+
+            const roomRef = db.ref('royal_rooms/' + rName + '/players');
+            
+            roomRef.on('value', snap => {
+                const players = snap.val();
+                if(!players) return;
+
+                const keys = Object.keys(players);
+                const p1Score = players[myName] || 50;
                 let p2Score = 50;
-                let otherPlayer = "الخصم";
+                let otherName = "في انتظار خصم...";
 
-                for(let key in data) {
-                    if(key !== myID) {
-                        p2Score = data[key];
-                        otherPlayer = key;
-                    }
-                }
+                keys.forEach(k => { if(k !== myName) { p2Score = players[k]; otherName = k; } });
 
-                // حساب النسب المئوية للشريط
                 const total = p1Score + p2Score;
-                const p1Percent = (p1Score / total) * 100;
-                const p2Percent = (p2Score / total) * 100;
+                const p1P = (p1Score / total) * 100;
+                const p2P = (p2Score / total) * 100;
 
-                document.getElementById('p1-bar').style.height = p1Percent + "%";
-                document.getElementById('p2-bar').style.height = p2Percent + "%";
-                document.getElementById('p1-label').innerText = `أنت: ${Math.floor(p1Percent)}%`;
-                document.getElementById('p2-label').innerText = `${otherPlayer}: ${Math.floor(p2Percent)}%`;
+                document.getElementById('p1-bar').style.height = p1P + "%";
+                document.getElementById('p2-bar').style.height = p2P + "%";
+                document.getElementById('p1-label').innerText = `أنت (${myName}): ${Math.floor(p1P)}%`;
+                document.getElementById('p2-label').innerText = `${otherName}: ${Math.floor(p2P)}%`;
 
-                // فحص الفوز
-                if(p1Percent >= 90) endGame("لقد سحقت الخصم!");
-                if(p2Percent >= 90) endGame("لقد تمت هزيمتك!");
+                if(p1P > 95) { alert("انتصرت!"); resetRoom(rName); }
             });
 
-            // حدث الضغط للهجوم
-            const trigger = document.getElementById('attack-trigger');
-            const handleAttack = () => {
-                db.ref('games/' + gameID + '/' + myID).transaction(current => (current || 50) + 2);
-                // نقص من الخصم قليلاً
-                gameRef.once('value', snap => {
-                    snap.forEach(child => {
-                        if(child.key !== myID) {
-                            db.ref('games/' + gameID + '/' + child.key).transaction(c => (c || 50) - 1);
-                        }
-                    });
-                });
+            // حدث الضرب
+            const hitBtn = document.getElementById('hit-btn');
+            const attack = () => {
+                roomRef.child(myName).transaction(s => (s || 50) + 3);
             };
-
-            trigger.addEventListener('touchstart', (e) => { e.preventDefault(); handleAttack(); });
-            trigger.addEventListener('mousedown', handleAttack);
+            hitBtn.onclick = attack;
+            hitBtn.ontouchstart = (e) => { e.preventDefault(); attack(); };
         }
 
-        function endGame(msg) {
-            const screen = document.getElementById('win-screen');
-            screen.style.display = 'flex';
-            document.getElementById('win-text').innerText = msg;
-            db.ref('games/' + gameID).remove(); // إعادة ضبط اللعبة
+        function resetRoom(rName) {
+            db.ref('royal_rooms/' + rName).remove();
+            location.reload();
         }
     </script>
 </body>
