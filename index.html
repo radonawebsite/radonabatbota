@@ -3,60 +3,69 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>X-CORE | نزال العروش 3D</title>
+    <title>X-CORE | صراع النصال الخارق</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@900&family=Amiri:wght@700&display=swap');
-        body { margin: 0; overflow: hidden; background: #000; font-family: 'Amiri', serif; }
+        @import url('https://fonts.googleapis.com/css2?family=Amiri:wght@700&display=swap');
         
-        /* واجهة الدخول الملكية */
-        #auth-overlay {
-            position: fixed; inset: 0; background: radial-gradient(circle, #2b0202, #000);
-            z-index: 1000; display: flex; align-items: center; justify-content: center;
+        :root { --gold: #d4af37; --blood: #8b0000; }
+        body { margin: 0; background: #050505; color: var(--gold); font-family: 'Amiri', serif; overflow: hidden; touch-action: none; }
+
+        /* واجهة الدخول والرومات */
+        #ui-layer {
+            position: fixed; inset: 0; z-index: 100;
+            background: radial-gradient(circle, #1a0a05, #000);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
         }
-        .royal-card {
-            background: #1a0a05; border: 2px solid #d4af37; padding: 40px;
-            text-align: center; width: 300px; box-shadow: 0 0 50px #000;
+        .royal-box {
+            border: 2px solid var(--gold); padding: 30px; background: rgba(0,0,0,0.8);
+            box-shadow: 0 0 30px var(--blood); text-align: center; width: 300px;
         }
         input { 
-            width: 100%; padding: 12px; background: #000; border: 1px solid #d4af37; 
-            color: #d4af37; text-align: center; margin-bottom: 20px; font-size: 1.2rem;
+            width: 100%; padding: 12px; background: #000; border: 1px solid var(--gold); 
+            color: #fff; text-align: center; margin-bottom: 15px; font-size: 1.1rem;
         }
-        .btn-gold {
-            background: #d4af37; color: #000; border: none; padding: 10px 30px;
-            font-weight: 900; cursor: pointer; width: 100%;
+        .btn {
+            background: var(--gold); color: #000; border: none; padding: 10px 20px;
+            font-weight: bold; cursor: pointer; width: 100%; transition: 0.3s;
         }
+        .btn:hover { background: #fff; box-shadow: 0 0 15px var(--gold); }
 
-        /* أدوات التحكم للهاتف (تظهر فقط في شاشات اللمس) */
-        #mobile-controls {
-            position: fixed; bottom: 30px; left: 30px; width: 120px; height: 120px;
-            background: rgba(212, 175, 55, 0.2); border-radius: 50%; border: 2px solid #d4af37;
-            display: none; z-index: 500; touch-action: none;
+        /* شاشة اللعب */
+        #game-canvas { display: none; background: url('https://www.transparenttextures.com/patterns/dark-matter.png'); }
+        
+        /* أدوات التحكم للهاتف */
+        #controls {
+            position: fixed; bottom: 20px; width: 100%; display: none;
+            justify-content: space-between; padding: 0 30px; box-sizing: border-box;
         }
-        #joystick-stick {
-            position: absolute; top: 35px; left: 35px; width: 50px; height: 50px;
-            background: #d4af37; border-radius: 50%;
-        }
-        #attack-btn {
-            position: fixed; bottom: 40px; right: 40px; width: 80px; height: 80px;
-            background: #4a0404; border: 3px solid #d4af37; border-radius: 50%;
-            display: none; z-index: 500; color: #d4af37; font-weight: bold;
-        }
+        .joystick { width: 80px; height: 80px; background: rgba(212,175,55,0.2); border-radius: 50%; border: 2px solid var(--gold); }
+        #atk-btn { width: 70px; height: 70px; background: var(--blood); border: 2px solid var(--gold); border-radius: 50%; color: #fff; font-weight: bold; }
     </style>
 </head>
 <body>
 
-    <div id="auth-overlay">
-        <div class="royal-card">
-            <h1 style="color:#d4af37; font-family:'Playfair Display'">الولوج المباشر</h1>
-            <input type="text" id="username" placeholder="اكتب اسمك الملكي" maxlength="6">
-            <button class="btn-gold" onclick="enterArena()">دخول الحلبة</button>
+    <div id="ui-layer">
+        <div class="royal-box" id="login-box">
+            <h1 style="font-size: 2rem;">نِزالُ الأساطير</h1>
+            <input type="text" id="username" placeholder="ادخل اسمك الملكي" maxlength="8">
+            <button class="btn" onclick="showRooms()">دخول</button>
+        </div>
+
+        <div class="royal-box" id="room-box" style="display:none;">
+            <h2>اختر قاعة النزال</h2>
+            <div id="rooms-list"></div>
+            <input type="text" id="new-room" placeholder="اسم قاعة جديدة">
+            <button class="btn" onclick="joinRoom()">بدء القتال</button>
         </div>
     </div>
 
-    <div id="mobile-controls"><div id="joystick-stick"></div></div>
-    <button id="attack-btn">هجوم!</button>
+    <canvas id="game-canvas"></canvas>
 
-    <script src="https://cdn.jsdelivr.net/npm/three@0.137.5/build/three.min.js"></script>
+    <div id="controls">
+        <div class="joystick" id="move-pad"></div>
+        <button id="atk-btn">ATTACK</button>
+    </div>
+
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
 
@@ -69,127 +78,113 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        let myId = "";
-        let scene, camera, renderer, playerBox;
-        let otherPlayers = {};
-        const moveSpeed = 0.15;
+        let myName = "";
+        let currentRoom = "";
+        const canvas = document.getElementById('game-canvas');
+        const ctx = canvas.getContext('2d');
+        let players = {};
 
-        // فحص نوع الجهاز لتفعيل أزرار الهاتف
-        if ('ontouchstart' in window) {
-            document.getElementById('mobile-controls').style.display = 'block';
-            document.getElementById('attack-btn').style.display = 'block';
+        function showRooms() {
+            myName = document.getElementById('username').value.trim();
+            if(myName.length < 3) return alert("الاسم قصير!");
+            document.getElementById('login-box').style.display = 'none';
+            document.getElementById('room-box').style.display = 'block';
         }
 
-        function enterArena() {
-            myId = document.getElementById('username').value.trim();
-            if(!myId || myId.length < 3) return alert("الاسم قصير جداً");
+        function joinRoom() {
+            currentRoom = document.getElementById('new-room').value || "MainArena";
+            document.getElementById('ui-layer').style.display = 'none';
+            canvas.style.display = 'block';
+            if('ontouchstart' in window) document.getElementById('controls').style.display = 'flex';
             
-            document.getElementById('auth-overlay').style.display = 'none';
-            init3D();
-            syncWithFirebase();
+            initGame();
         }
 
-        function init3D() {
-            scene = new THREE.Scene();
-            camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
-            renderer = new THREE.WebGLRenderer({ antialias: true });
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            document.body.appendChild(renderer.domElement);
+        function initGame() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
 
-            // أرضية فيكتورية مذهبة
-            const floorGeo = new THREE.PlaneGeometry(50, 50);
-            const floorMat = new THREE.MeshPhongMaterial({ color: 0x1a1a1a, side: THREE.DoubleSide });
-            const floor = new THREE.Mesh(floorGeo, floorMat);
-            floor.rotation.x = Math.PI / 2;
-            scene.add(floor);
-
-            // إضاءة درامية
-            const light = new THREE.PointLight(0xd4af37, 2, 100);
-            light.position.set(0, 10, 0);
-            scene.add(light);
-            scene.add(new THREE.AmbientLight(0x404040));
-
-            // إنشاء لاعبك (تاج ذهبي مبسط)
-            const playerGeo = new THREE.ConeGeometry(0.5, 1, 8);
-            const playerMat = new THREE.MeshPhongMaterial({ color: 0xd4af37 });
-            playerBox = new THREE.Mesh(playerGeo, playerMat);
-            playerBox.position.y = 0.5;
-            scene.add(playerBox);
-
-            camera.position.set(0, 5, 10);
-            camera.lookAt(playerBox.position);
-
-            animate();
-        }
-
-        function syncWithFirebase() {
-            const playerRef = db.ref('arena/players/' + myId);
-            playerRef.set({ x: 0, z: 0, hp: 100 });
+            const playerRef = db.ref(`rooms/${currentRoom}/players/${myName}`);
+            playerRef.set({ x: 100, y: 300, dir: 1, action: 'idle', hp: 100 });
             playerRef.onDisconnect().remove();
 
-            db.ref('arena/players').on('value', snap => {
-                const data = snap.val() || {};
-                Object.keys(data).forEach(id => {
-                    if(id !== myId) {
-                        if(!otherPlayers[id]) {
-                            const enemyGeo = new THREE.BoxGeometry(0.8, 0.8, 0.8);
-                            const enemyMat = new THREE.MeshPhongMaterial({ color: 0x4a0404 });
-                            otherPlayers[id] = new THREE.Mesh(enemyGeo, enemyMat);
-                            scene.add(otherPlayers[id]);
-                        }
-                        otherPlayers[id].position.set(data[id].x, 0.4, data[id].z);
-                    }
-                });
-                // إزالة اللاعبين الخارجين
-                Object.keys(otherPlayers).forEach(id => {
-                    if(!data[id]) {
-                        scene.remove(otherPlayers[id]);
-                        delete otherPlayers[id];
-                    }
-                });
+            // الاستماع لكل اللاعبين
+            db.ref(`rooms/${currentRoom}/players`).on('value', snap => {
+                players = snap.val() || {};
             });
+
+            gameLoop();
         }
 
-        // نظام التحكم المزدوج (PC + Mobile)
-        const keys = {};
-        window.onkeydown = (e) => keys[e.key] = true;
-        window.onkeyup = (e) => keys[e.key] = false;
-
-        function animate() {
-            requestAnimationFrame(animate);
+        // نظام التحريك والأنميشن الخارق
+        function drawPlayer(id, p) {
+            ctx.save();
+            ctx.translate(p.x, p.y);
             
-            let moved = false;
-            if(keys['ArrowUp'] || keys['w']) { playerBox.position.z -= moveSpeed; moved = true; }
-            if(keys['ArrowDown'] || keys['s']) { playerBox.position.z += moveSpeed; moved = true; }
-            if(keys['ArrowLeft'] || keys['a']) { playerBox.position.x -= moveSpeed; moved = true; }
-            if(keys['ArrowRight'] || keys['d']) { playerBox.position.x += moveSpeed; moved = true; }
+            // الظل
+            ctx.fillStyle = "rgba(0,0,0,0.3)";
+            ctx.beginPath(); ctx.ellipse(0, 45, 20, 5, 0, 0, Math.PI*2); ctx.fill();
 
-            if(moved) {
-                db.ref('arena/players/' + myId).update({
-                    x: playerBox.position.x,
-                    z: playerBox.position.z
-                });
-                camera.position.x = playerBox.position.x;
-                camera.position.z = playerBox.position.z + 10;
+            // رسم الشخصية (سيلويت محارب)
+            ctx.scale(p.dir, 1);
+            ctx.fillStyle = (id === myName) ? "#d4af37" : "#8b0000";
+            
+            // الجسد (تغيير الارتفاع لمحاكاة التنفس)
+            let breathe = Math.sin(Date.now() / 200) * 2;
+            ctx.fillRect(-15, -40 + breathe, 30, 80); 
+            
+            // السيف
+            ctx.strokeStyle = "#fff"; ctx.lineWidth = 4;
+            if(p.action === 'attack') {
+                ctx.beginPath(); ctx.moveTo(10, 0); ctx.lineTo(50, -20); ctx.stroke();
+                // تأثير ضربة (Flash)
+                ctx.fillStyle = "rgba(255,255,255,0.8)";
+                ctx.beginPath(); ctx.arc(40, -10, 15, 0, Math.PI*2); ctx.fill();
+            } else {
+                ctx.beginPath(); ctx.moveTo(10, 20); ctx.lineTo(30, -30); ctx.stroke();
             }
-            
-            renderer.render(scene, camera);
+
+            // الاسم
+            ctx.scale(p.dir, 1);
+            ctx.fillStyle = "#fff"; ctx.font = "14px Amiri";
+            ctx.fillText(id, -20, -60);
+            ctx.restore();
         }
 
-        // تحكم الجويستيك للهاتف (بسيط)
-        let touchX = 0, touchY = 0;
-        document.getElementById('mobile-controls').addEventListener('touchmove', (e) => {
-            const touch = e.touches[0];
-            const rect = e.target.getBoundingClientRect();
-            const centerX = rect.left + rect.width / 2;
-            const centerY = rect.top + rect.height / 2;
+        function gameLoop() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
             
-            const dx = (touch.clientX - centerX) / 50;
-            const dy = (touch.clientY - centerY) / 50;
+            // رسم الحلبة
+            ctx.strokeStyle = "rgba(212,175,55,0.2)";
+            for(let i=0; i<canvas.width; i+=50) { ctx.beginPath(); ctx.moveTo(i,0); ctx.lineTo(i,canvas.height); ctx.stroke(); }
+
+            // رسم كل اللاعبين
+            Object.keys(players).forEach(id => {
+                drawPlayer(id, players[id]);
+            });
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        // التحكم (PC)
+        window.addEventListener('keydown', e => {
+            const p = players[myName];
+            if(!p) return;
+            let updates = { action: 'idle' };
             
-            playerBox.position.x += dx * moveSpeed;
-            playerBox.position.z += dy * moveSpeed;
-            db.ref('arena/players/' + myId).update({ x: playerBox.position.x, z: playerBox.position.z });
+            if(e.key === 'ArrowRight') { updates.x = p.x + 15; updates.dir = 1; }
+            if(e.key === 'ArrowLeft') { updates.x = p.x - 15; updates.dir = -1; }
+            if(e.code === 'Space') { 
+                updates.action = 'attack';
+                setTimeout(() => db.ref(`rooms/${currentRoom}/players/${myName}/action`).set('idle'), 200);
+            }
+            db.ref(`rooms/${currentRoom}/players/${myName}`).update(updates);
+        });
+
+        // الهجوم للهاتف
+        document.getElementById('atk-btn').addEventListener('touchstart', () => {
+            db.ref(`rooms/${currentRoom}/players/${myName}/action`).set('attack');
+            setTimeout(() => db.ref(`rooms/${currentRoom}/players/${myName}/action`).set('idle'), 200);
         });
     </script>
 </body>
